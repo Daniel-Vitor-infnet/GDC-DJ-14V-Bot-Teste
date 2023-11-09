@@ -32,7 +32,6 @@ const client = new Client({
   ]
 });
 
-const path = require('node:path');
 const fs = require("fs")
 
 module.exports = client;
@@ -41,8 +40,6 @@ const eventFiles = [
   "interactionCreate",
   "messageCreate",
   "manage_database",
-  "guildMemberAdd",
-  "guildMemberRemove",
 ];
 // Registre os Eventos
 for (const eventFile of eventFiles) {

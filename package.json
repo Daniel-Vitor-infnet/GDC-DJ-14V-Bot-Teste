@@ -1,7 +1,7 @@
 {
-  "name": "gdc-adm-14v-bot-teste",
-  "version": "45.0",
-  "description": "Um bot completo para administrar seu servidor.",
+  "name": "gdc-dj-14v-bot-teste",
+  "version": "1.0",
+  "description": "Um bot completo para ouvir músicas.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,7 +10,6 @@
   "license": "ISC",
   "dependencies": {
     "@discordjs/voice": "^0.16.0",
-    "cpu-stat": "^2.0.1",
     "discord.js": "^14.13.0",
     "ffmpeg-static": "^5.2.0",
     "fs": "^0.0.1-security",
@@ -18,7 +17,6 @@
     "moment-duration-format": "^2.3.2",
     "moment-timezone": "^0.5.43",
     "node-cron": "^3.0.2",
-    "node-fetch": "^3.3.2",
     "path": "^0.12.7",
     "sqlite3": "^5.1.6",
     "ytdl-core": "^4.11.5"
