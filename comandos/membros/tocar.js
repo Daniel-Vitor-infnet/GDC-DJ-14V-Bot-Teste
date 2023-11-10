@@ -4,10 +4,6 @@ const { joinVoiceChannel, createAudioPlayer, createAudioResource, VoiceConnectio
 const yts = require('yt-search');
 
 
-//Aviso já esta desbloqueado
-const textoTempoExpirado = `❌ Tempo expirado use o comando novamente!`;
-const avisoTempoExpirado = Aviso(textoTempoExpirado);
-
 module.exports = {
   name: "tocar",
   description: "Reproduz música do YouTube.",
