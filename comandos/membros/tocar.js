@@ -12,7 +12,7 @@ function truncate(str, maxLength) {
 }
 
 module.exports = {
-  name: "play",
+  name: "tocar",
   description: "Reproduz música do YouTube.",
   type: 1,
   options: [
