@@ -3,7 +3,6 @@ const ytdl = require('ytdl-core');
 const { joinVoiceChannel, createAudioPlayer, createAudioResource, VoiceConnectionStatus } = require('@discordjs/voice');
 const ffmpeg = require('ffmpeg-static');
 
-
 module.exports = {
   name: "play",
   description: "Reproduz música do YouTube.",
@@ -18,28 +17,31 @@ module.exports = {
   ],
 
   run: async (client, interaction) => {
-    // Seu código principal
+    try {
+      // Verifique se o usuário está em um canal de voz
+      const voiceChannel = interaction.member.voice.channel;
+      if (!voiceChannel) {
+        return interaction.reply({ content: "Você precisa estar em um canal de voz para usar este comando!", ephemeral: true });
+      }
 
-    // Verifique se o usuário está em um canal de voz
-    let voiceChannel = interaction.member.voice.channel;
-    if (!voiceChannel) {
-      return interaction.reply({ content: "Você precisa estar em um canal de voz para usar este comando!", ephemeral: true });
-    }
+      // Verifique se o bot tem permissão para se conectar ao canal de voz
+      const permissions = voiceChannel.permissionsFor(client.user);
+      if (!permissions.has("CONNECT") || !permissions.has("SPEAK")) {
+        return interaction.reply({ content: "Eu não tenho permissão para entrar e falar no canal de voz.", ephemeral: true });
+      }
 
-    // Verifique se o bot tem permissão para se conectar ao canal de voz
-    const permissions = voiceChannel.permissionsFor(client.user);
-    if (!permissions.has("CONNECT") || !permissions.has("SPEAK")) {
-      return interaction.reply({ content: "Eu não tenho permissão para entrar e falar no canal de voz.", ephemeral: true });
-    }
+      // Verifique o estado da conexão antes de tentar reproduzir música
+      const connection = joinVoiceChannel({
+        channelId: voiceChannel.id,
+        guildId: voiceChannel.guild.id,
+        adapterCreator: voiceChannel.guild.voiceAdapterCreator,
+      });
 
-    // Lógica de reprodução de música
-    const connection = joinVoiceChannel({
-      channelId: voiceChannel.id,
-      guildId: voiceChannel.guild.id,
-      adapterCreator: voiceChannel.guild.voiceAdapterCreator,
-    });
+      if (connection.state.status !== VoiceConnectionStatus.Ready) {
+        return interaction.reply({ content: "Houve um problema ao conectar-se ao canal de voz.", ephemeral: true });
+      }
 
-    connection.on(VoiceConnectionStatus.Ready, () => {
+      // Lógica de reprodução de música
       const link = interaction.options.getString('link');
       const url = link; 
 
@@ -59,10 +61,9 @@ module.exports = {
         .setFooter({ text: client.user.username, iconURL: client.user.displayAvatarURL() });
 
       interaction.reply({ embeds: [embed] });
-    });
-
-    connection.on(VoiceConnectionStatus.Disconnected, () => {
-      connection.destroy();
-    });
+    } catch (error) {
+      console.error(error);
+      interaction.reply({ content: "Ocorreu um erro ao processar o comando.", ephemeral: true });
+    }
   }
 };
