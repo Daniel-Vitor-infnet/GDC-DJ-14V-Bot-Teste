@@ -1,15 +1,12 @@
-const { Discord, Bot } = require("../../estruturas/constantes.js");
-const ytdl = require('ytdl-core');
+const { Discord, sqlite3, Cor, Bot, Gif, Aviso, Aviso2, Aviso3, PermissaoDono, Permissao, Erro, BloqueadoComando } = require("../../estruturas/constantes.js");
+const ytdl = require('ytdl-core-discord');
 const { joinVoiceChannel, createAudioPlayer, createAudioResource, VoiceConnectionStatus } = require('@discordjs/voice');
 const yts = require('yt-search');
 
-function truncate(str, maxLength) {
-  if (str.length > maxLength) {
-    return str.substring(0, maxLength - 3) + '...';
-  } else {
-    return str;
-  }
-}
+
+//Aviso já esta desbloqueado
+const textoTempoExpirado = `❌ Tempo expirado use o comando novamente!`;
+const avisoTempoExpirado = Aviso(textoTempoExpirado);
 
 module.exports = {
   name: "tocar",
@@ -17,7 +14,7 @@ module.exports = {
   type: 1,
   options: [
     {
-      name: "query",
+      name: "link_ou_nome",
       description: "Insira uma palavra-chave ou link do YouTube.",
       type: 3,
       required: true,
@@ -46,12 +43,12 @@ module.exports = {
       });
 
       // Lógica para verificar se é um link do YouTube
-      const query = interaction.options.getString('query');
+      const query = interaction.options.getString('link_ou_nome');
       const isYouTubeLink = ytdl.validateURL(query);
 
       if (isYouTubeLink) {
         // É um link do YouTube, reproduza diretamente
-        const stream = ytdl(query, { filter: "audioonly" });
+        const stream = await ytdl(query, { quality: 'highestaudio', highWaterMark: 1 << 25 });
         const resource = createAudioResource(stream);
 
         const player = createAudioPlayer();
@@ -77,7 +74,15 @@ module.exports = {
       }
 
       // Mostre os 10 primeiros resultados para o usuário escolher
-      const videoList = searchResults.videos.slice(0, 10);
+      const videoList = searchResults.videos.slice(0, 15);
+
+      function truncate(str, maxLength) {
+        if (str.length > maxLength) {
+          return str.substring(0, maxLength - 3) + '...';
+        } else {
+          return str;
+        }
+      }
 
       const choices = videoList.map((video, index) => ({
         label: `${index + 1}. ${truncate(video.title, 30 - (index + 1).toString().length)}`, // Função truncate para limitar o comprimento
@@ -85,7 +90,7 @@ module.exports = {
         description: video.title,
       }));
 
-      
+
 
       const selectMenu = new Discord.ActionRowBuilder().addComponents(
         new Discord.StringSelectMenuBuilder()
@@ -94,17 +99,17 @@ module.exports = {
           .addOptions(choices)
       );
 
-      const embed = new Discord.EmbedBuilder()
+      const escolhaMusicaDaLista = new Discord.EmbedBuilder()
         .setTitle("**Escolha uma música**")
         .setColor(Bot.Cor)
         .setTimestamp()
         .setFooter({ text: client.user.username, iconURL: client.user.displayAvatarURL() });
 
-      interaction.reply({ embeds: [embed], components: [selectMenu], ephemeral: true });
+      interaction.reply({ embeds: [escolhaMusicaDaLista], components: [selectMenu], ephemeral: true });
 
       // Aguarde a resposta do usuário
       const filter = (interaction) => interaction.user.id === interaction.user.id && interaction.customId === 'select';
-      const collected = await interaction.channel.awaitMessageComponent({ filter, time: 30000 });
+      const collected = await interaction.channel.awaitMessageComponent({ filter, time: 120000 });
 
       // Verifique se a escolha do usuário está dentro dos limites
       const choiceIndex = parseInt(collected.values[0]);
@@ -121,15 +126,17 @@ module.exports = {
           .setPlaceholder('Escolha uma opção')
           .addOptions([
             {
-              label: `Reproduzir Música `, 
+              label: `Reproduzir Música `,
               value: 'play',
-            },
-            {
-              label: 'Voltar para Opções de Músicas',
-              value: 'back',
-            },
+            }
           ])
       );
+
+      //Tratar as visualizações
+      function formatarNumeroComPontuacao(numero) {
+        return numero.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      }
+      const viewsTratada = formatarNumeroComPontuacao(chosenVideo.views);
 
       //Pegar a tumbnall do vídeo
       let tumbnallDoVideo = chosenVideo.url;
@@ -139,22 +146,22 @@ module.exports = {
       const detailsEmbed = new Discord.EmbedBuilder()
         .setTitle(`**Detalhes do Vídeo**`)
         .setColor(Bot.Cor)
-        .setDescription(`**Título:** ${chosenVideo.title}\n**Autor:** ${chosenVideo.author.name}\n**Visualizações:** ${chosenVideo.views}\n**Duração:** ${chosenVideo.timestamp}\n**URL:** [${chosenVideo.title}](${chosenVideo.url})`)
-        .setTimestamp()
-        .setThumbnail(tumbnallDoVideo)
-        .setFooter({ text: client.user.username, iconURL: client.user.displayAvatarURL() });
+        .setDescription(`**Título:** [${chosenVideo.title}](${chosenVideo.url})\n**Canal:** ${chosenVideo.author.name}\n**Visualizações:** ${viewsTratada}\n**Duração:** ${chosenVideo.timestamp}`)
+        .setImage(tumbnallDoVideo)
+        .setFooter({ text: client.user.username, iconURL: client.user.displayAvatarURL() })
+        .setTimestamp();
 
-      interaction.followUp({ embeds: [detailsEmbed], components: [videoDetailsMenu] });
+      interaction.followUp({ embeds: [detailsEmbed], components: [videoDetailsMenu], ephemeral: true });
+
 
       // Aguarde a resposta do usuário para o novo menu
       const detailsFilter = (interaction) => interaction.user.id === interaction.user.id && interaction.customId === 'videoDetails';
-      const detailsCollected = await interaction.channel.awaitMessageComponent({ filter: detailsFilter, time: 30000 });
-
+      const detailsCollected = await interaction.channel.awaitMessageComponent({ filter: detailsFilter, time: 120000 });
       // Processa a escolha do usuário no novo menu
       const detailsChoice = detailsCollected.values[0];
       if (detailsChoice === 'play') {
         // Lógica de reprodução de música
-        const stream = ytdl(chosenVideo.url, { filter: "audioonly" });
+        const stream = await ytdl(chosenVideo.url, { quality: 'highestaudio', highWaterMark: 1 << 25 });
         const resource = createAudioResource(stream);
 
         const player = createAudioPlayer();
@@ -165,15 +172,13 @@ module.exports = {
         const nowPlayingEmbed = new Discord.EmbedBuilder()
           .setTitle(`**🎶 Comando Play 🎶**`)
           .setColor(Bot.Cor)
-          .setDescription(`**🎵 Música em reprodução no canal de voz: ${voiceChannel.name}**\n\n${chosenVideo.title}\n${chosenVideo.url}`)
-          .setTimestamp()
-          .setFooter({ text: client.user.username, iconURL: client.user.displayAvatarURL() });
+          .setDescription(`**🎵 Música em reprodução no canal de voz: <#${voiceChannel.id}>**\n\n[${chosenVideo.title}](${chosenVideo.url})`)
+          .setImage(tumbnallDoVideo)
+          .setFooter({ text: client.user.username, iconURL: client.user.displayAvatarURL() })
+          .setTimestamp();
 
         interaction.followUp({ embeds: [nowPlayingEmbed], components: [] });
-      } else if (detailsChoice === 'back') {
-        // Volta para as opções de músicas chamando novamente a função principal
-        return module.exports.run(client, interaction);
-      }
+      } 
     } catch (error) {
       console.error(error);
       interaction.reply({ content: "Ocorreu um erro ao processar o comando.", ephemeral: true });
