@@ -73,7 +73,7 @@ module.exports = {
         return interaction.reply({ content: "Não foram encontrados resultados para a sua busca.", ephemeral: true });
       }
 
-      // Mostre os 10 primeiros resultados para o usuário escolher
+      // Mostre os 15 primeiros resultados para o usuário escolher
       const videoList = searchResults.videos.slice(0, 15);
 
       function truncate(str, maxLength) {
@@ -111,15 +111,6 @@ module.exports = {
       // Aguarde a resposta do usuário
       const filter = (interaction) => interaction.user.id === interaction.user.id && interaction.customId === 'select';
       const collected = await interaction.channel.awaitMessageComponent({ filter });
-
-      // Desabilitar o menu de seleção
-      const remover = new Discord.EmbedBuilder()
-        .setTitle("**Escolha uma música**")
-        .setColor(Bot.Cor)
-        .setTimestamp()
-        .setFooter({ text: client.user.username, iconURL: client.user.displayAvatarURL() });
-
-      await interaction.editReply({ embeds: [remover], components: [], ephemeral: true });
 
 
       // Verifique se a escolha do usuário está dentro dos limites
