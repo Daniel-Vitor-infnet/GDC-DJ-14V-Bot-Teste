@@ -53,14 +53,7 @@ for (const eventFile of eventFiles) {
   }
 }
 
-// Função assíncrona para chamar Post Do Reddit
 
-const { postNewMemes, intervalMemes } = require('./eventos/reddit/post_meme.js');
-const { postNewPutaria, intervalPutaria } = require('./eventos/reddit/post_putaria.js');
-
-// Configure o setInterval para ambos os módulos
-setInterval(() => postNewMemes(client), intervalMemes);
-setInterval(() => postNewPutaria(client), intervalPutaria);
 
 
 
