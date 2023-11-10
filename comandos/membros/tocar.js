@@ -105,11 +105,12 @@ module.exports = {
         .setTimestamp()
         .setFooter({ text: client.user.username, iconURL: client.user.displayAvatarURL() });
 
+      
       interaction.reply({ embeds: [escolhaMusicaDaLista], components: [selectMenu], ephemeral: true });
 
       // Aguarde a resposta do usuário
       const filter = (interaction) => interaction.user.id === interaction.user.id && interaction.customId === 'select';
-      const collected = await interaction.channel.awaitMessageComponent({ filter, time: 120000 });
+      const collected = await interaction.channel.awaitMessageComponent({ filter});
 
       // Verifique se a escolha do usuário está dentro dos limites
       const choiceIndex = parseInt(collected.values[0]);
@@ -128,7 +129,11 @@ module.exports = {
             {
               label: `Reproduzir Música `,
               value: 'play',
-            }
+            },
+            {
+              label: `Parar`,
+              value: 'stop',
+            },
           ])
       );
 
@@ -151,15 +156,18 @@ module.exports = {
         .setFooter({ text: client.user.username, iconURL: client.user.displayAvatarURL() })
         .setTimestamp();
 
-      interaction.followUp({ embeds: [detailsEmbed], components: [videoDetailsMenu], ephemeral: true });
+        
+      interaction.editReply({ embeds: [detailsEmbed], components: [videoDetailsMenu], ephemeral: true });
 
 
       // Aguarde a resposta do usuário para o novo menu
-      const detailsFilter = (interaction) => interaction.user.id === interaction.user.id && interaction.customId === 'videoDetails';
-      const detailsCollected = await interaction.channel.awaitMessageComponent({ filter: detailsFilter, time: 120000 });
+      const detailsFilter = (interaction) => interaction.user.id === interaction.member.user.id && interaction.customId === 'videoDetails' && interaction.message.id === interaction.message.id;
+      const detailsCollected = await interaction.channel.awaitMessageComponent({ filter: detailsFilter});
       // Processa a escolha do usuário no novo menu
       const detailsChoice = detailsCollected.values[0];
-      if (detailsChoice === 'play') {
+      if (detailsChoice === 'stop') {
+        
+      }else if (detailsChoice === 'play') {
         // Lógica de reprodução de música
         const stream = await ytdl(chosenVideo.url, { quality: 'highestaudio', highWaterMark: 1 << 25 });
         const resource = createAudioResource(stream);
