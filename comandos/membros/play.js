@@ -2,13 +2,20 @@ const { Discord, sqlite3, Cor, Bot, Gif, Aviso, Aviso2, Aviso3, PermissaoDono, P
 const ytdl = require('ytdl-core');
 const { joinVoiceChannel, createAudioPlayer, createAudioResource, VoiceConnectionStatus } = require('@discordjs/voice');
 const ffmpeg = require('ffmpeg-static');
-//npm install libsodium-wrappers
 
 
 module.exports = {
   name: "play",
   description: "Reproduz música do YouTube.",
   type: 1,
+  options: [
+    {
+      name: "link",
+      description: "Insira o link do Youtube video",
+      type: 3,
+      required: true,
+    }
+  ],
 
   run: async (client, interaction) => {
     // Seu código principal
@@ -33,7 +40,8 @@ module.exports = {
     });
 
     connection.on(VoiceConnectionStatus.Ready, () => {
-      const url = "https://youtu.be/qKvj12YTtI4"; // Substitua pelo URL do vídeo do YouTube
+      const link = interaction.options.getString('link');
+      const url = link; 
 
       const stream = ytdl(url, { filter: "audioonly" });
       const resource = createAudioResource(stream);
