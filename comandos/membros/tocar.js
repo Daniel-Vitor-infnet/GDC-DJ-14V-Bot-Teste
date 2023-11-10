@@ -141,7 +141,7 @@ module.exports = {
               value: 'play',
             },
             {
-              label: `Parar`,
+              label: `Cancelar Comando`,
               value: 'stop',
             },
           ])
@@ -169,7 +169,7 @@ module.exports = {
         setTimeout(async () => {
           // Sua linha de código para editar a resposta
           await interaction.editReply({ embeds: [detailsEmbed], components: [videoDetailsMenu] });
-      }, 10000);
+      }, 3000);
         
 
 
@@ -179,7 +179,7 @@ module.exports = {
       // Processa a escolha do usuário no novo menu
       const detailsChoice = detailsCollected.values[0];
       if (detailsChoice === 'stop') {
-
+        interaction.followUp("Infelizmente será necessario vc fazer a busca novamente");
       } else if (detailsChoice === 'play') {
         // Lógica de reprodução de música
         const stream = await ytdl(chosenVideo.url, { quality: 'highestaudio', highWaterMark: 1 << 25 });
