@@ -3,6 +3,14 @@ const ytdl = require('ytdl-core');
 const { joinVoiceChannel, createAudioPlayer, createAudioResource, VoiceConnectionStatus } = require('@discordjs/voice');
 const yts = require('yt-search');
 
+function truncate(str, maxLength) {
+  if (str.length > maxLength) {
+    return str.substring(0, maxLength - 3) + '...';
+  } else {
+    return str;
+  }
+}
+
 module.exports = {
   name: "play",
   description: "Reproduz música do YouTube.",
@@ -72,10 +80,12 @@ module.exports = {
       const videoList = searchResults.videos.slice(0, 10);
 
       const choices = videoList.map((video, index) => ({
-        label: `${index + 1}. ${video.title}`,
+        label: `${index + 1}. ${truncate(video.title, 30 - (index + 1).toString().length)}`, // Função truncate para limitar o comprimento
         value: index.toString(),
         description: video.title,
       }));
+
+      
 
       const selectMenu = new Discord.ActionRowBuilder().addComponents(
         new Discord.StringSelectMenuBuilder()
@@ -104,23 +114,66 @@ module.exports = {
 
       const chosenVideo = videoList[choiceIndex];
 
-      // Lógica de reprodução de música
-      const stream = ytdl(chosenVideo.url, { filter: "audioonly" });
-      const resource = createAudioResource(stream);
+      // Mostra um novo menu de seleção com informações detalhadas
+      const videoDetailsMenu = new Discord.ActionRowBuilder().addComponents(
+        new Discord.StringSelectMenuBuilder()
+          .setCustomId('videoDetails')
+          .setPlaceholder('Escolha uma opção')
+          .addOptions([
+            {
+              label: `Reproduzir Música `, 
+              value: 'play',
+            },
+            {
+              label: 'Voltar para Opções de Músicas',
+              value: 'back',
+            },
+          ])
+      );
 
-      const player = createAudioPlayer();
-      player.play(resource);
+      //Pegar a tumbnall do vídeo
+      let tumbnallDoVideo = chosenVideo.url;
+      tumbnallDoVideo = tumbnallDoVideo.replace("https://youtube.com/watch?v=", "");
+      tumbnallDoVideo = `https://img.youtube.com/vi/${tumbnallDoVideo}/maxresdefault.jpg`
 
-      connection.subscribe(player);
-
-      const nowPlayingEmbed = new Discord.EmbedBuilder()
-        .setTitle(`**🎶 Comando Play 🎶**`)
+      const detailsEmbed = new Discord.EmbedBuilder()
+        .setTitle(`**Detalhes do Vídeo**`)
         .setColor(Bot.Cor)
-        .setDescription(`**🎵 Música em reprodução no canal de voz: ${voiceChannel.name}**\n\n${chosenVideo.title}\n${chosenVideo.url}`)
+        .setDescription(`**Título:** ${chosenVideo.title}\n**Autor:** ${chosenVideo.author.name}\n**Visualizações:** ${chosenVideo.views}\n**Duração:** ${chosenVideo.timestamp}\n**URL:** [${chosenVideo.title}](${chosenVideo.url})`)
         .setTimestamp()
+        .setThumbnail(tumbnallDoVideo)
         .setFooter({ text: client.user.username, iconURL: client.user.displayAvatarURL() });
 
-      interaction.followUp({ embeds: [nowPlayingEmbed], components: [] });
+      interaction.followUp({ embeds: [detailsEmbed], components: [videoDetailsMenu] });
+
+      // Aguarde a resposta do usuário para o novo menu
+      const detailsFilter = (interaction) => interaction.user.id === interaction.user.id && interaction.customId === 'videoDetails';
+      const detailsCollected = await interaction.channel.awaitMessageComponent({ filter: detailsFilter, time: 30000 });
+
+      // Processa a escolha do usuário no novo menu
+      const detailsChoice = detailsCollected.values[0];
+      if (detailsChoice === 'play') {
+        // Lógica de reprodução de música
+        const stream = ytdl(chosenVideo.url, { filter: "audioonly" });
+        const resource = createAudioResource(stream);
+
+        const player = createAudioPlayer();
+        player.play(resource);
+
+        connection.subscribe(player);
+
+        const nowPlayingEmbed = new Discord.EmbedBuilder()
+          .setTitle(`**🎶 Comando Play 🎶**`)
+          .setColor(Bot.Cor)
+          .setDescription(`**🎵 Música em reprodução no canal de voz: ${voiceChannel.name}**\n\n${chosenVideo.title}\n${chosenVideo.url}`)
+          .setTimestamp()
+          .setFooter({ text: client.user.username, iconURL: client.user.displayAvatarURL() });
+
+        interaction.followUp({ embeds: [nowPlayingEmbed], components: [] });
+      } else if (detailsChoice === 'back') {
+        // Volta para as opções de músicas chamando novamente a função principal
+        return module.exports.run(client, interaction);
+      }
     } catch (error) {
       console.error(error);
       interaction.reply({ content: "Ocorreu um erro ao processar o comando.", ephemeral: true });
