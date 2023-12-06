@@ -51,10 +51,9 @@ module.exports = {
       let chosenVideo;
       let tumbnallDoVideo;
 
-      
-      
-      while (detailsChoice === "nenhuma_escolha") {
-        // Não é um link do YouTube, faça a pesquisa
+
+
+      while (detailsChoice === "nenhuma_escolha" || detailsChoice === "nenhuma_escolha_dnv") {
         const searchResults = await yts(query);
 
         if (!searchResults.videos || searchResults.videos.length === 0) {
@@ -93,19 +92,43 @@ module.exports = {
           .setTimestamp()
           .setFooter({ text: client.user.username, iconURL: client.user.displayAvatarURL() });
 
+        if (detailsChoice === "nenhuma_escolha_dnv") {
+          setTimeout(async () => {
+            interaction.editReply({ embeds: [escolhaMusicaDaLista], components: [selectMenu], ephemeral: true });
+          }, 4000); // 4 sec
+        } else {
+          interaction.editReply({ embeds: [escolhaMusicaDaLista], components: [selectMenu], ephemeral: true });
+        }
 
-        interaction.editReply({ embeds: [escolhaMusicaDaLista], components: [selectMenu], ephemeral: true });
 
         // Aguarde a resposta do usuário
         const filter = (interaction) => interaction.user.id === interaction.user.id && interaction.customId === 'select';
         const collected = await interaction.channel.awaitMessageComponent({ filter });
 
 
+        const progressBar = new Discord.ActionRowBuilder().addComponents(
+          new Discord.StringSelectMenuBuilder()
+            .setCustomId('barra')
+            .setPlaceholder('Carregando Aguarde !!!!')
+            .setDisabled(true)
+            .addOptions([
+              {
+                label: 'loading',
+                value: 'loading',
+              },
+            ])
+
+        );
+
+        interaction.editReply({ components: [progressBar], ephemeral: true });
+
+
+
         // Verifique se a escolha do usuário está dentro dos limites
         const choiceIndex = parseInt(collected.values[0]);
 
 
-         chosenVideo = videoList[choiceIndex];
+        chosenVideo = videoList[choiceIndex];
 
         // Mostra um novo menu de seleção com informações detalhadas
         const videoDetailsMenu = new Discord.ActionRowBuilder().addComponents(
@@ -119,7 +142,7 @@ module.exports = {
               },
               {
                 label: `Escolher Outra`,
-                value: 'nenhuma_escolha',
+                value: 'nenhuma_escolha_dnv',
               },
             ])
         );
@@ -144,15 +167,38 @@ module.exports = {
           .setTimestamp();
 
 
-        interaction.editReply({ embeds: [detailsEmbed], components: [videoDetailsMenu], ephemeral: true });
+        setTimeout(async () => {
+          interaction.editReply({ embeds: [detailsEmbed], components: [videoDetailsMenu], ephemeral: true });
+        }, 4000); // 4 sec
 
 
         // Aguarde a resposta do usuário para o novo menu
         const detailsFilter = (interaction) => interaction.user.id === interaction.member.user.id && interaction.customId === 'videoDetails' && interaction.message.id === interaction.message.id;
         const detailsCollected = await interaction.channel.awaitMessageComponent({ filter: detailsFilter });
         // Processa a escolha do usuário no novo menu
-         detailsChoice = detailsCollected.values[0];
-         console.log(detailsChoice)
+        detailsChoice = detailsCollected.values[0];
+
+
+        if (detailsChoice === "nenhuma_escolha_dnv") {
+          const progressBar = new Discord.ActionRowBuilder().addComponents(
+            new Discord.StringSelectMenuBuilder()
+              .setCustomId('barra')
+              .setPlaceholder('Carregando Aguarde !!!!')
+              .setDisabled(true)
+              .addOptions([
+                {
+                  label: 'loading',
+                  value: 'loading',
+                },
+              ])
+
+          );
+
+          interaction.editReply({ components: [progressBar], ephemeral: true });
+
+        }
+
+
       }
 
 
