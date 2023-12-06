@@ -93,11 +93,11 @@ module.exports = {
       const filter = (interaction) => interaction.user.id === interaction.user.id && interaction.customId === 'select';
       const collected = await interaction.channel.awaitMessageComponent({ filter});
 
+      console.log(filter)
+
       // Verifique se a escolha do usuário está dentro dos limites
       const choiceIndex = parseInt(collected.values[0]);
-      if (isNaN(choiceIndex) || choiceIndex < 0 || choiceIndex >= videoList.length) {
-        return interaction.followUp({ content: "Escolha inválida. Por favor, tente novamente.", ephemeral: true });
-      }
+
 
       const chosenVideo = videoList[choiceIndex];
 
@@ -146,9 +146,7 @@ module.exports = {
       const detailsCollected = await interaction.channel.awaitMessageComponent({ filter: detailsFilter});
       // Processa a escolha do usuário no novo menu
       const detailsChoice = detailsCollected.values[0];
-      if (detailsChoice === 'stop') {
-        
-      }else if (detailsChoice === 'play') {
+     if (detailsChoice === 'play') {
         // Lógica de reprodução de música
         const stream = await ytdl(chosenVideo.url, { quality: 'highestaudio', highWaterMark: 1 << 25 });
         const resource = createAudioResource(stream);
