@@ -44,27 +44,8 @@ module.exports = {
 
       // Lógica para verificar se é um link do YouTube
       const query = interaction.options.getString('link_ou_nome');
-      const isYouTubeLink = ytdl.validateURL(query);
 
-      if (isYouTubeLink) {
-        // É um link do YouTube, reproduza diretamente
-        const stream = await ytdl(query, { quality: 'highestaudio', highWaterMark: 1 << 25 });
-        const resource = createAudioResource(stream);
-
-        const player = createAudioPlayer();
-        player.play(resource);
-
-        connection.subscribe(player);
-
-        const nowPlayingEmbed = new Discord.EmbedBuilder()
-          .setTitle(`**🎶 Comando Play 🎶**`)
-          .setColor(Bot.Cor)
-          .setDescription(`**🎵 Música em reprodução no canal de voz: ${voiceChannel.name}**`)
-          .setTimestamp()
-          .setFooter({ text: client.user.username, iconURL: client.user.displayAvatarURL() });
-
-        return interaction.reply({ embeds: [nowPlayingEmbed] });
-      }
+      
 
       // Não é um link do YouTube, faça a pesquisa
       const searchResults = await yts(query);
