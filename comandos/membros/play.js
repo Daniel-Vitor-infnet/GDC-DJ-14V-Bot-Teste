@@ -198,9 +198,7 @@ module.exports = {
 
         }
 
-
       }
-
 
 
       // Lógica de reprodução de música
@@ -210,7 +208,18 @@ module.exports = {
       const player = createAudioPlayer();
       player.play(resource);
 
+     
+
       connection.subscribe(player);
+
+      player.on('stateChange', (oldState, newState) => {
+        if (oldState.status !== newState.status && newState.status === 'idle') {
+          console.log('Reprodução concluída');
+        }
+      });
+
+
+
 
       const nowPlayingEmbed = new Discord.EmbedBuilder()
         .setTitle(`**🎶 Comando Play 🎶**`)
