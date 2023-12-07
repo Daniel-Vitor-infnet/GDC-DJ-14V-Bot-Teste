@@ -101,7 +101,7 @@ async function playMusic(voiceChannel, interaction, guildId) {
                                 return;
                             }
                         }
-                    }, 300_000); // 5 min
+                    }, 180_000); // 5 min
                 }
 
                 if (playlist.length > 0) {
