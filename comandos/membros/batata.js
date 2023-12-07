@@ -3,8 +3,8 @@ const { joinVoiceChannel, createAudioPlayer, createAudioResource, VoiceConnectio
 const ytSearch = require('yt-search');
 const ytdl = require('ytdl-core-discord');
 
-// Estrutura para armazenar a lista de reprodução
-const playlist = [];
+// Estrutura para armazenar listas de reprodução por guild ID
+const playlists = new Map();
 
 module.exports = {
     name: 'batata',
@@ -21,11 +21,17 @@ module.exports = {
     run: async (client, interaction) => {
         await interaction.deferReply();
 
-
-
         try {
             const query = interaction.options.getString('query');
             const voiceChannel = interaction.member.voice.channel;
+            const guildId = interaction.guild.id;
+
+            // Verificar se existe uma lista de reprodução para o servidor
+            if (!playlists.has(guildId)) {
+                playlists.set(guildId, []);
+            }
+
+            const playlist = playlists.get(guildId);
 
             if (!voiceChannel) {
                 return interaction.followUp('Você precisa estar em um canal de voz para usar este comando.');
@@ -38,7 +44,7 @@ module.exports = {
 
             // Se não estiver reproduzindo, iniciar reprodução
             if (playlist.length === 1) {
-                playMusic(voiceChannel, interaction);
+                playMusic(voiceChannel, interaction, guildId);
             }
 
             // Responder ao usuário
@@ -47,11 +53,9 @@ module.exports = {
                 .setDescription(`[${video.title}](${video.url})`)
                 .setColor('#9370DB');
 
-
             if (playlist.length > 1) {
                 interaction.followUp({ embeds: [embed] });
             }
-
         } catch (error) {
             console.error(error);
             await interaction.followUp('Ocorreu um erro ao executar o comando.');
@@ -60,7 +64,7 @@ module.exports = {
 };
 
 // Função para reproduzir música da lista de reprodução
-async function playMusic(voiceChannel, interaction) {
+async function playMusic(voiceChannel, interaction, guildId) {
     try {
         const connection = joinVoiceChannel({
             channelId: voiceChannel.id,
@@ -68,6 +72,7 @@ async function playMusic(voiceChannel, interaction) {
             adapterCreator: voiceChannel.guild.voiceAdapterCreator,
         });
 
+        const playlist = playlists.get(guildId);
         const video = playlist[0];
 
         const stream = await ytdl(video.url, { quality: 'highestaudio', highWaterMark: 1 << 25 });
@@ -77,29 +82,27 @@ async function playMusic(voiceChannel, interaction) {
         connection.subscribe(player);
         player.play(resource);
 
-
         player.on('stateChange', (oldState, newState) => {
             if (oldState.status !== newState.status && newState.status === 'idle') {
                 // Remover música da lista de reprodução após terminar de reproduzir
                 playlist.shift();
                 const membrosAtuisDoCanal = voiceChannel.members.size || 0;
-                console.log(membrosAtuisDoCanal)
 
                 if (membrosAtuisDoCanal <= 1) {
                     setTimeout(() => {
                         if (membrosAtuisDoCanal <= 1) {
-                            connection.destroy(); // Se n tiver ninguém na call sair 
+                            return connection.destroy(); // Se n tiver ninguém na call sair 
                         }
                     }, 300000); // 5 min
                 }
 
                 if (playlist.length > 0) {
-                    playMusic(voiceChannel, interaction);
+                    playMusic(voiceChannel, interaction, guildId);
                 } else {
                     if (playlist.length === 0) {
                         setTimeout(() => {
                             if (playlist.length === 0) {
-                                connection.destroy(); // Se a lista estiver vazia, sair do canal de voz
+                                return connection.destroy(); // Se a lista estiver vazia, sair do canal de voz
                             }
                         }, 300000); // 5 min
                     }
