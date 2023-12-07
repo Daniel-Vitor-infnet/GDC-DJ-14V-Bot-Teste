@@ -77,14 +77,12 @@ async function playMusic(voiceChannel, interaction) {
         connection.subscribe(player);
         player.play(resource);
 
-        
-
 
         player.on('stateChange', (oldState, newState) => {
             if (oldState.status !== newState.status && newState.status === 'idle') {
                 // Remover música da lista de reprodução após terminar de reproduzir
                 playlist.shift();
-                const membrosAtuisDoCanal = connection?.channel?.members?.size || 0;
+                const membrosAtuisDoCanal = voiceChannel.members.size || 0;
                 console.log(membrosAtuisDoCanal)
 
                 if (membrosAtuisDoCanal <= 1) {
