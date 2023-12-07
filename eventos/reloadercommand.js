@@ -22,10 +22,14 @@ module.exports = async (client) => {
     }
   };
 
+  // Limpa todos os comandos registrados
+  client.guilds.cache.forEach((guild) => guild.commands.set([]));
+
   // Inicia a leitura dos comandos na pasta "comandos"
   readCommands("./comandos");
 
   client.on("ready", async () => {
+    // Define os novos comandos após limpar os existentes
     client.guilds.cache.forEach((guild) => guild.commands.set(SlashsArray));
   });
 };

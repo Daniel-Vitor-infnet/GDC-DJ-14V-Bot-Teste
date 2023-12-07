@@ -1,5 +1,5 @@
-const { Discord, sqlite3, Cor, Bot, Gif, Aviso, Aviso2, Aviso3, PermissaoDono, Permissao, Erro, BloqueadoComando } = require("./estruturas/constantes.js");
-
+const { Discord, sqlite3, Cor, Bot, Midia, GDC } = require("./estruturas/modulos.js");
+const functions = require("./estruturas/functions_import.js");
 const config = require("./config.json")
 const { Client, Collection, GatewayIntentBits, Partials } = require("discord.js");
 const client = new Client({
@@ -32,6 +32,7 @@ const client = new Client({
   ]
 });
 
+const path = require('node:path');
 const fs = require("fs")
 
 module.exports = client;
@@ -39,7 +40,6 @@ const eventFiles = [
   "ready",
   "interactionCreate",
   "messageCreate",
-  "manage_database",
 ];
 // Registre os Eventos
 for (const eventFile of eventFiles) {
@@ -52,7 +52,6 @@ for (const eventFile of eventFiles) {
     client.on(eventName, (...args) => event.execute(...args, client));
   }
 }
-
 
 
 

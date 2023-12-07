@@ -11,7 +11,7 @@ const {
 } = require("./functions/embedPersonalizados.js");
 
 const {
-  verificaComandoBloqueado,
+  voipAtual,
 } = require("./functions/functions.js")
 
 //const {
@@ -35,7 +35,7 @@ module.exports = {
   BloqueadoComando,
   subComandoBloqueado,
   ///functions
-  verificaComandoBloqueado,
+  voipAtual,
   ///functions2
   ///datas_horas
   dataDefault,
