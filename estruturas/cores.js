@@ -6,6 +6,7 @@ const cores = {
     Perdão:                         '#02d800',
     WhatsApp:                       '#02d800',
     Discord:                        '#0012e0',
+    Steam:                          '#00126a',
     Permissao:                      '#0b9cff'
 }
 
