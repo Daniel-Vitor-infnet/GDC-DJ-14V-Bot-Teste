@@ -1,4 +1,6 @@
-const { Discord, sqlite3, Cor, Bot, Gif, Aviso, Aviso2, Aviso3, PermissaoDono, Permissao, Erro, BloqueadoComando } = require("../../estruturas/constantes.js");
+const { Discord, sqlite3, Cor, Bot, Midia, GDC } = require("../../estruturas/modulos.js");
+const functions = require("../../estruturas/functions_import.js");
+
 const { joinVoiceChannel, createAudioPlayer, createAudioResource, VoiceConnectionStatus } = require('@discordjs/voice');
 const ytSearch = require('yt-search');
 const ytdl = require('ytdl-core-discord');
@@ -25,6 +27,9 @@ module.exports = {
             const query = interaction.options.getString('query');
             const voiceChannel = interaction.member.voice.channel;
             const guildId = interaction.guild.id;
+            
+
+         
 
             // Verificar se existe uma lista de reprodução para o servidor
             if (!playlists.has(guildId)) {
@@ -33,9 +38,18 @@ module.exports = {
 
             const playlist = playlists.get(guildId);
 
+
             if (!voiceChannel) {
                 return interaction.followUp('Você precisa estar em um canal de voz para usar este comando.');
+            } else if (playlist.length > 0) {
+                const botDentroDoVoip = functions.voipAtual(interaction, client, voiceChannel)
+                console.log((await botDentroDoVoip).status)
+
+                if ((await botDentroDoVoip).status) {
+                    return interaction.followUp(`O bot já esta no voip ${(await botDentroDoVoip).canal}. Só é permito um voip por servidor, caso queira mover o bot precisa remover ele da call use \`\`/sair\`\` para tirar o bot`);
+                }
             }
+
 
             // Adicionar música à lista de reprodução
             const videoResult = await ytSearch(query);
@@ -66,6 +80,7 @@ module.exports = {
 // Função para reproduzir música da lista de reprodução
 async function playMusic(voiceChannel, interaction, guildId) {
     try {
+
         const connection = joinVoiceChannel({
             channelId: voiceChannel.id,
             guildId: voiceChannel.guild.id,
@@ -87,10 +102,11 @@ async function playMusic(voiceChannel, interaction, guildId) {
                 // Remover música da lista de reprodução após terminar de reproduzir
                 playlist.shift();
                 const membrosAtuisDoCanal = voiceChannel.members.size || 0;
+                const playListAtual = playlist.length || 0;
 
-                if (membrosAtuisDoCanal <= 1) {
+                if (membrosAtuisDoCanal <= 1 || playListAtual === 0) {
                     setTimeout(() => {
-                        if (membrosAtuisDoCanal <= 1) {
+                        if (membrosAtuisDoCanal <= 1 || playListAtual === 0) {
                             if (playlists.has(guildId)) {
                                 playlists.delete(guildId);
                             }
@@ -101,28 +117,12 @@ async function playMusic(voiceChannel, interaction, guildId) {
                                 return;
                             }
                         }
-                    }, 180_000); // 5 min
+                    }, 300_000); // 5 min
+                } else {
+                    playMusic(voiceChannel, interaction, guildId);
                 }
 
-                if (playlist.length > 0) {
-                    playMusic(voiceChannel, interaction, guildId);
-                } else {
-                    if (playlist.length === 0) {
-                        setTimeout(() => {
-                            if (playlist.length === 0) {
-                                if (playlists.has(guildId)) {
-                                    playlists.delete(guildId);
-                                }
-                                if (connection.state.status === VoiceConnectionStatus.Ready) {
-                                    connection.destroy(); // Se n tiver ninguém na call sair 
-                                }
-                                if (interaction) {
-                                    return;
-                                }
-                            }
-                        }, 300_000); // 5 min
-                    }
-                }
+
             }
         });
 
