@@ -91,9 +91,17 @@ async function playMusic(voiceChannel, interaction, guildId) {
                 if (membrosAtuisDoCanal <= 1) {
                     setTimeout(() => {
                         if (membrosAtuisDoCanal <= 1) {
-                            return connection.destroy(); // Se n tiver ninguém na call sair 
+                            if (playlists.has(guildId)) {
+                                playlists.delete(guildId);
+                            }
+                            if (connection.state.status === VoiceConnectionStatus.Ready) {
+                                connection.destroy(); // Se n tiver ninguém na call sair 
+                            }
+                            if (interaction) {
+                                return;
+                            }
                         }
-                    }, 300000); // 5 min
+                    }, 300_000); // 5 min
                 }
 
                 if (playlist.length > 0) {
@@ -102,9 +110,17 @@ async function playMusic(voiceChannel, interaction, guildId) {
                     if (playlist.length === 0) {
                         setTimeout(() => {
                             if (playlist.length === 0) {
-                                return connection.destroy(); // Se a lista estiver vazia, sair do canal de voz
+                                if (playlists.has(guildId)) {
+                                    playlists.delete(guildId);
+                                }
+                                if (connection.state.status === VoiceConnectionStatus.Ready) {
+                                    connection.destroy(); // Se n tiver ninguém na call sair 
+                                }
+                                if (interaction) {
+                                    return;
+                                }
                             }
-                        }, 300000); // 5 min
+                        }, 300_000); // 5 min
                     }
                 }
             }
