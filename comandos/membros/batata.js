@@ -68,8 +68,9 @@ async function playMusic(voiceChannel, interaction) {
         const player = createAudioPlayer();
         connection.subscribe(player);
 
+
         player.on('stateChange', (oldState, newState) => {
-            if (newState.status === VoiceConnectionStatus.Idle) {
+            if (oldState.status !== newState.status && newState.status === 'idle') {
                 // Remover música da lista de reprodução após terminar de reproduzir
                 playlist.shift();
 
@@ -90,6 +91,12 @@ async function playMusic(voiceChannel, interaction) {
 
         player.play(resource);
 
+        // Aguardar a promessa retornada por player.play para determinar quando a música terminou
+        await new Promise(resolve => {
+            player.once('idle', resolve);
+        });
+
+        // Após a música terminar, a próxima música será reproduzida pela chamada recursiva
         const embed = new Discord.EmbedBuilder()
             .setTitle('Reproduzindo agora:')
             .setDescription(`[${video.title}](${video.url})`)
@@ -101,5 +108,3 @@ async function playMusic(voiceChannel, interaction) {
         await interaction.followUp('Ocorreu um erro ao reproduzir a música.');
     }
 }
-
-
