@@ -25,8 +25,6 @@ module.exports = {
   // Função para notificar o desenvolvedor por mensagem direta (DM)
   voipAtual: async function (interaction, client, voipSolicitado) {
 
-    console.log(voipSolicitado.guild.id)
-
     let status = false;
     let canal = '';
 
@@ -36,7 +34,6 @@ module.exports = {
     const botMember = guild.members.cache.get(client.user.id);
 
     const voiceState = botMember.voice;
-    console.log(voiceState.channel.id)
 
 
     // Verifica se o bot está em algum canal de voz
