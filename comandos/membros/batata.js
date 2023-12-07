@@ -27,9 +27,6 @@ module.exports = {
             const query = interaction.options.getString('query');
             const voiceChannel = interaction.member.voice.channel;
             const guildId = interaction.guild.id;
-            
-
-         
 
             // Verificar se existe uma lista de reprodução para o servidor
             if (!playlists.has(guildId)) {
@@ -39,15 +36,21 @@ module.exports = {
             const playlist = playlists.get(guildId);
 
 
+            //Verifica se o membro esta em canal de voip
             if (!voiceChannel) {
                 return interaction.followUp('Você precisa estar em um canal de voz para usar este comando.');
-            } else if (playlist.length > 0) {
+            } else if (playlist.length > 0) { // Verifica se o bot já esta em um voip do servidor
                 const botDentroDoVoip = functions.voipAtual(interaction, client, voiceChannel)
-                console.log((await botDentroDoVoip).status)
 
                 if ((await botDentroDoVoip).status) {
                     return interaction.followUp(`O bot já esta no voip ${(await botDentroDoVoip).canal}. Só é permito um voip por servidor, caso queira mover o bot precisa remover ele da call use \`\`/sair\`\` para tirar o bot`);
                 }
+            }
+
+            // Verifique se o bot tem permissão para se conectar ao canal de voz
+            const permissions = voiceChannel.permissionsFor(client.user);
+            if (!permissions.has("CONNECT") || !permissions.has("SPEAK")) {
+                return interaction.followUp("Eu não tenho permissão para entrar e falar no canal de voz.");
             }
 
 
