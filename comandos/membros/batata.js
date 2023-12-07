@@ -48,7 +48,10 @@ module.exports = {
                 .setColor('#9370DB');
 
 
-            interaction.followUp({ embeds: [embed] });
+            if (playlist.length > 1) {
+                interaction.followUp({ embeds: [embed] });
+            }
+
         } catch (error) {
             console.error(error);
             await interaction.followUp('Ocorreu um erro ao executar o comando.');
@@ -65,38 +68,47 @@ async function playMusic(voiceChannel, interaction) {
             adapterCreator: voiceChannel.guild.voiceAdapterCreator,
         });
 
+        const video = playlist[0];
+
+        const stream = await ytdl(video.url, { quality: 'highestaudio', highWaterMark: 1 << 25 });
+        const resource = createAudioResource(stream, { inputType: 'opus' });
         const player = createAudioPlayer();
+
         connection.subscribe(player);
+        player.play(resource);
+
+        
 
 
         player.on('stateChange', (oldState, newState) => {
             if (oldState.status !== newState.status && newState.status === 'idle') {
                 // Remover música da lista de reprodução após terminar de reproduzir
                 playlist.shift();
+                const membrosAtuisDoCanal = connection?.channel?.members?.size || 0;
+                console.log(membrosAtuisDoCanal)
 
-                // Reproduzir a próxima música, se houver
-                playMusic(voiceChannel, interaction);
+                if (membrosAtuisDoCanal <= 1) {
+                    setTimeout(() => {
+                        if (membrosAtuisDoCanal <= 1) {
+                            connection.destroy(); // Se n tiver ninguém na call sair 
+                        }
+                    }, 300000); // 5 min
+                }
+
+                if (playlist.length > 0) {
+                    playMusic(voiceChannel, interaction);
+                } else {
+                    if (playlist.length === 0) {
+                        setTimeout(() => {
+                            if (playlist.length === 0) {
+                                connection.destroy(); // Se a lista estiver vazia, sair do canal de voz
+                            }
+                        }, 300000); // 5 min
+                    }
+                }
             }
         });
 
-        const video = playlist[0];
-
-        if (!video) {
-            // Se não houver mais músicas na lista, sair do canal de voz
-            return voiceChannel.leave();
-        }
-
-        const stream = await ytdl(video.url, { quality: 'highestaudio', highWaterMark: 1 << 25 });
-        const resource = createAudioResource(stream, { inputType: 'opus' });
-
-        player.play(resource);
-
-        // Aguardar a promessa retornada por player.play para determinar quando a música terminou
-        await new Promise(resolve => {
-            player.once('idle', resolve);
-        });
-
-        // Após a música terminar, a próxima música será reproduzida pela chamada recursiva
         const embed = new Discord.EmbedBuilder()
             .setTitle('Reproduzindo agora:')
             .setDescription(`[${video.title}](${video.url})`)
