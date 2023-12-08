@@ -68,18 +68,25 @@ module.exports = {
 
             // Adicionar música à lista de reprodução
             const videoResult = await ytSearch(query);
-            let videoSemtratar;
+            let videoLink;
+            let videoPalavraChave;
 
             //Verifica se a resposta foi link. caso for busca apenas o resultado do link
             if (linkOuNome.tipo === "link") {
-                videoSemtratar = videoResult.videos[0];
-                if (videoSemtratar.videoId !== linkOuNome.resultado)
+                videoLink = await tratarInfosYoutube(videoResult.videos[0], interaction, voiceChannel);
+                if (videoLink.id !== linkOuNome.resultado)
                     return interaction.followUp(`Nenhum resultado foi encontrado para o link: ${interaction.options.getString('link_ou_nome')}`);
             } else {
-                videoSemtratar = await procurarPorPalavra(interaction, videoResult, client);
+                videoPalavraChave = await procurarPorPalavra(interaction, videoResult, client);
+                console.log(videoPalavraChave)
+                if (videoPalavraChave === null) {
+                    return interaction.editReply({ content: `Você demorou muito para responder. Use o comando novamente`, embeds: [], components: [], ephemeral: true });
+                }
             }
 
-            const video = await tratarInfosYoutube(videoSemtratar, interaction, voiceChannel)
+            // const video = await tratarInfosYoutube(videoTratado, interaction, voiceChannel)
+            const video = videoLink || videoPalavraChave
+            functions.consoleCompleto(video)
 
             //Adiciona a música (vídeo) para playlist
             playlist.push(video);
@@ -182,22 +189,27 @@ async function tratarInfosYoutube(video, interaction, voiceChannel) {
 
     const tag = membro.discriminator === '0' ? "Indisponível (conta criada recentemente)" : `#${membro.discriminator}`
 
+    let solicitado = null;
 
-    const solicitado = {
-        membro: {
-            nome: membro.username,
-            tag: tag,
-            id: membro.id,
-        },
-        servidor: {
-            nome: guild.name,
-            id: guild.id,
-            canal: {
-                nome: voiceChannel.name,
-                id: voiceChannel.id,
-            }
-        },
+
+    if (voiceChannel) {
+        solicitado = {
+            membro: {
+                nome: membro.username,
+                tag: tag,
+                id: membro.id,
+            },
+            servidor: {
+                nome: guild.name,
+                id: guild.id,
+                canal: {
+                    nome: voiceChannel.name,
+                    id: voiceChannel.id,
+                }
+            },
+        }
     }
+
 
 
 
@@ -208,13 +220,13 @@ async function tratarInfosYoutube(video, interaction, voiceChannel) {
         title: video.title || "O título possui caracteres, símbolos ou emojis que não posso reproduzir.",
         description: video.description || "Indisponível",
         url: video.url || "Indisponível",
-        solocitadoPor: solicitado,
+        solocitadoPor: solicitado || "Indisponível",
         id: video.videoId || "Indisponível",
         seconds: video.seconds || "Indisponível",
         tempo: video.timestamp || "Indisponível",
         duration: video.duration || "Indisponível",
         views: video.views ? video.views.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "Indisponível",
-        ago: video.ago ? await functions.converterDataParaPortugues(video.ago) : "Indisponível",
+        upload: video.ago ? await functions.converterDataParaPortugues(video.ago) : "Indisponível",
         imagem: video.image ? thumbDoVideoMax : Midia.Gif.VideoSemImagem,
         thumb: video.thumbnail ? thumbDoVideoMax : Midia.Gif.VideoSemImagem,
         canalDoYoutube: video.author || "Indisponível",
@@ -264,13 +276,16 @@ async function procurarPorPalavra(interaction, videoResultados, client) {
         const collector = interaction.channel.createMessageComponentCollector({ filter, time: 60000 });
 
         collector.on('collect', async i => {
-            const escolhaMenu1 = i.values[0];
-            const videoSemtratar = videoLista[escolhaMenu1];
+            const escolhaMenu1 = i.values[0]
+            const videoTratado =  await tratarInfosYoutube(videoLista[escolhaMenu1], interaction);
+           // console.log(videoTratado)
+           
+            
 
             const embedEscolha1Resultado = new Discord.EmbedBuilder()
                 .setTitle(`**Detalhes do Vídeo**`)
                 .setColor(Bot.Cor)
-                .setDescription(`**Título:** [${videoSemtratar.title}](${videoSemtratar.url})\n**Canal:** ${videoSemtratar.author.name}\n**Visualizações:** ${videoSemtratar.views}\n**Duração:** ${videoSemtratar.timestamp}`)
+                .setDescription(`**Título:** [${videoTratado.title}](${videoTratado.url})\n**Visualizações:** ${videoTratado.views}\n**Duração:** ${videoTratado.tempo}`)
                 .setFooter({ text: client.user.username, iconURL: client.user.displayAvatarURL() })
                 .setTimestamp();
 
@@ -301,7 +316,7 @@ async function procurarPorPalavra(interaction, videoResultados, client) {
 
                 // Verifica se a resposta do menu2 é 'Sim'
                 if (escolhaMenu2 === 'sim') {
-                    resolve(videoSemtratar);
+                    resolve(videoTratado);
                 } else {
                     // Permanece aguardando no escolha15
                     await j.update({ embeds: [embedEscolha1], components: [escolha15], ephemeral: true });
