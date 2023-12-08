@@ -75,6 +75,8 @@ module.exports = {
                 videoSemtratar = videoResult.videos[0];
                 if (videoSemtratar.videoId !== linkOuNome.resultado)
                     return interaction.followUp(`Nenhum resultado foi encontrado para o link: ${interaction.options.getString('link_ou_nome')}`);
+            } else {
+                videoSemtratar = await procurarPorPalavra(interaction, videoResult, client);
             }
 
             const video = await tratarInfosYoutube(videoSemtratar, interaction, voiceChannel)
@@ -222,4 +224,97 @@ async function tratarInfosYoutube(video, interaction, voiceChannel) {
 
 
     return videosTratados
+}
+
+async function procurarPorPalavra(interaction, videoResultados, client) {
+    return new Promise(async (resolve) => {
+
+    // Mostre os 15 primeiros resultados para o usuário escolher
+    const videoLista = videoResultados.videos.slice(0, 15);
+
+
+    function truncate(str, maxLength) {
+        if (str.length > maxLength) {
+            return str.substring(0, maxLength - 3) + '...';
+        } else {
+            return str;
+        }
+    }
+
+    const escolhas = videoLista.map((video, index) => ({
+        label: `${index + 1}. ${truncate(video.title, 30 - (index + 1).toString().length)}`, // Função truncate para limitar o comprimento
+        value: index.toString(),
+        description: video.title,
+    }));
+
+    console.log(escolhas)
+
+    const embedEscolha1 = new Discord.EmbedBuilder()
+        .setTitle("Escolha sua música")
+        .setColor(Bot.Cor)
+        .setTimestamp()
+        .setFooter({ text: interaction.user.username, iconURL: interaction.user.displayAvatarURL() });
+
+    const escolha15 = new Discord.ActionRowBuilder().addComponents(
+        new Discord.StringSelectMenuBuilder()
+            .setCustomId('escolha15')
+            .setPlaceholder('Escolha uma opção')
+            .addOptions(escolhas)
+    );
+
+    interaction.followUp({ embeds: [embedEscolha1], components: [escolha15], ephemeral: true });
+
+
+    client.on('interactionCreate', async interaction => {
+        if (interaction.isSelectMenu()) {
+            const escolhaMenu1 = interaction.values[0]; // Obtém a opção escolhida no escolha15
+
+            videoSemtratar = videoLista[escolhaMenu1];
+
+
+            // Verifica qual opção foi escolhida
+
+            const embedEscolha1Resultado = new Discord.EmbedBuilder()
+                .setTitle(`**Detalhes do Vídeo**`)
+                .setColor(Bot.Cor)
+                .setDescription(`**Título:** [${videoSemtratar.title}](${videoSemtratar.url})\n**Canal:** ${videoSemtratar.author.name}\n**Visualizações:** ${videoSemtratar.views}\n**Duração:** ${videoSemtratar.timestamp}`)
+                // .setImage(tumbnallDoVideo)
+                .setFooter({ text: client.user.username, iconURL: client.user.displayAvatarURL() })
+                .setTimestamp();
+
+
+            const menu2 = new Discord.ActionRowBuilder().addComponents(
+                new Discord.StringSelectMenuBuilder()
+                    .setCustomId('menu2')
+                    .setPlaceholder('Tem certeza?')
+                    .addOptions([
+                        {
+                            label: 'Sim',
+                            value: 'sim',
+                        },
+                        {
+                            label: 'Não',
+                            value: 'nao',
+                        },
+                    ])
+            );
+
+            // Responde com o resultado do primeiro menu e apresenta o segundo menu
+            interaction.update({ embeds: [embedEscolha1Resultado], components: [menu2], ephemeral: true });
+        }
+
+        // Tratamento da interação do menu2
+        if (interaction.isSelectMenu() && interaction.customId === 'menu2') {
+            const escolhaMenu2 = interaction.values[0]; // Obtém a opção escolhida no menu2
+
+            // Verifica se a resposta do menu2 é 'Não'
+            if (escolhaMenu2 === 'nao') {
+                // Volta para o escolha15
+                interaction.update({ embeds: [embedEscolha1], components: [escolha15], ephemeral: true });
+            } else {
+                resolve(videoSemtratar);
+            }
+        }
+    });
+    });
 }
