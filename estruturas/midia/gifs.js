@@ -59,7 +59,7 @@ const gifs = {
     
     
     
-    Barra:                           'https://i.imgur.com/M4yDcAq.png',
+    VideoSemImagem:                 'https://d540vms5r2s2d.cloudfront.net/mad/uploads/mad_blog_5b8e65f4da71a1536058868.jpg',
 }
 
 module.exports = gifs;

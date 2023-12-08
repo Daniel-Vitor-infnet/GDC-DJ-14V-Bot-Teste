@@ -50,6 +50,39 @@ module.exports = {
     }
   },
 
+
+  converterDataParaPortugues: async function (dataEmIngles) {
+
+    // Mapeia as palavras-chave em inglês para português
+    const mapeamentoPalavrasChave = {
+      'years': 'anos',
+      'months': 'meses',
+      'weeks': 'semanas',
+      'days': 'dias',
+      'hours': 'horas',
+      'minutes': 'minutos',
+      'seconds': 'segundos',
+      'year': 'ano',
+      'month': 'mês',
+      'week': 'semana',
+      'day': 'dia',
+      'hour': 'hora',
+      'minute': 'minuto',
+      'second': 'segundo'
+    };
+  
+    // Divide a string para obter a quantidade e a unidade de tempo
+    const partes = dataEmIngles.split(' ');
+    const quantidade = partes[0];
+    const unidade = partes[1];
+  
+    // Traduz a unidade de tempo
+    const traducao = mapeamentoPalavrasChave[unidade] || unidade;
+  
+    // Retorna a tradução completa
+    return `${quantidade} ${traducao} atrás`;
+  },
+
 }
 
 

@@ -14,13 +14,15 @@ const {
   voipAtual,
 } = require("./functions/functions.js")
 
-//const {
-//} = require("./functions/functions2.js")
+const {
+  capturarIDDoVideo,
+} = require("./functions/functions2.js")
 
 const {
   dataDefault,
   dataPersonalizada,
   calcularTempo,
+  converterDataParaPortugues,
 } = require("./functions/datas_horas.js")
 
 module.exports = {
@@ -37,9 +39,11 @@ module.exports = {
   ///functions
   voipAtual,
   ///functions2
+  capturarIDDoVideo,
   ///datas_horas
   dataDefault,
   dataPersonalizada,
   calcularTempo,
+  converterDataParaPortugues,
 };
 
