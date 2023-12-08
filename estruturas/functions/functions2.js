@@ -33,8 +33,6 @@ module.exports = {
       tipo = "id"
     }
 
-    console.log(resultado, tipo)
-
 
     return { resultado, tipo };
 
