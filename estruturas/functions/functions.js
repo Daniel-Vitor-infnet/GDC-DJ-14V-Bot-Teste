@@ -21,6 +21,21 @@ const {
 module.exports = {
 
 
+  // Função para notificar o desenvolvedor por mensagem direta (DM)
+  consoleCompleto: async function (solicitado) {
+
+    // Código ANSI para cor laranja
+    const corLaranja = '\x1b[33m';
+
+    // Código ANSI para redefinir a cor para a padrão
+    const resetCor = '\x1b[0m';
+
+    console.log(corLaranja, JSON.stringify(solicitado, null, 2), resetCor);
+
+    return;
+
+  },
+
 
   // Função para notificar o desenvolvedor por mensagem direta (DM)
   voipAtual: async function (interaction, client, voipSolicitado) {

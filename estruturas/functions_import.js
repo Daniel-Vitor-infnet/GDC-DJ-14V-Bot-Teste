@@ -11,6 +11,7 @@ const {
 } = require("./functions/embedPersonalizados.js");
 
 const {
+  consoleCompleto,
   voipAtual,
 } = require("./functions/functions.js")
 
@@ -37,6 +38,7 @@ module.exports = {
   BloqueadoComando,
   subComandoBloqueado,
   ///functions
+  consoleCompleto,
   voipAtual,
   ///functions2
   capturarIDDoVideo,
