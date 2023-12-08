@@ -298,18 +298,18 @@ async function procurarPorPalavra(interaction, videoResultados, client) {
 
             collectorMenu2.on('collect', async j => {
                 const escolhaMenu2 = j.values[0];
-                
+
                 // Verifica se a resposta do menu2 é 'Sim'
                 if (escolhaMenu2 === 'sim') {
                     resolve(videoSemtratar);
                 } else {
-                    // Volta para o escolha15
+                    // Permanece aguardando no escolha15
                     await j.update({ embeds: [embedEscolha1], components: [escolha15], ephemeral: true });
                 }
             });
 
-            collectorMenu2.on('end', collected => {
-                if (collected.size === 0) {
+            collectorMenu2.on('end', collectedMenu2 => {
+                if (collectedMenu2.size === 0) {
                     // Se o coletor do menu2 expirar, resolve com null ou outro valor desejado
                     resolve(null);
                 }
