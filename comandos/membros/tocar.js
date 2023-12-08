@@ -7,6 +7,7 @@ const ytdl = require('ytdl-core-discord');
 
 // Estrutura para armazenar listas de reprodução por guild ID
 const playlists = new Map();
+let linkOuNome;
 
 module.exports = {
     name: 'tocar',
@@ -24,10 +25,13 @@ module.exports = {
         await interaction.deferReply();
 
         try {
-            const query = await functions.capturarIDDoVideo(interaction.options.getString('link_ou_nome'));
+
+            linkOuNome = await functions.capturarIDDoVideo(interaction.options.getString('link_ou_nome'));
+
+            const query = linkOuNome.resultado
 
             //Verifica se a reposta é válida (Palavra-Chave ou link do Youtube)
-            if (!query) {
+            if (!linkOuNome.tipo) {
                 return interaction.followUp('Infelizmente no momento aceito apenas links do Youtube ou pesquisa por palavras chaves');
             }
 
@@ -64,7 +68,15 @@ module.exports = {
 
             // Adicionar música à lista de reprodução
             const videoResult = await ytSearch(query);
-            const videoSemtratar = videoResult.videos[0];
+            let videoSemtratar;
+
+            //Verifica se a resposta foi link. caso for busca apenas o resultado do link
+            if (linkOuNome.tipo === "link") {
+                videoSemtratar = videoResult.videos[0];
+                if (videoSemtratar.videoId !== linkOuNome.resultado)
+                    return interaction.followUp(`Nenhum resultado foi encontrado para o link: ${interaction.options.getString('link_ou_nome')}`);
+            }
+
             const video = await tratarInfosYoutube(videoSemtratar, interaction, voiceChannel)
 
             //Adiciona a música (vídeo) para playlist
@@ -85,8 +97,13 @@ module.exports = {
 
 
         } catch (error) {
-            console.log(error);
-            await interaction.followUp('Ocorreu um erro ao executar o comando.');
+            if (error.message.includes('no query given')) {
+                const resposta = interaction.options.getString('link_ou_nome')
+                await interaction.followUp(`Você forneceu uma palavra ou link \`\`${resposta}\`\`  inválido verifique`);
+            } else {
+                await interaction.followUp('Ocorreu um erro ao reproduzir a música. error');
+                console.log("Erro no comando de tocar", error)
+            }
         }
     },
     playlists,
@@ -147,8 +164,8 @@ async function playMusic(voiceChannel, interaction, guildId) {
 
         interaction.followUp({ embeds: [embed] });
     } catch (error) {
-        console.error(error);
-        await interaction.followUp('Ocorreu um erro ao reproduzir a música.');
+        await interaction.followUp(`Ocorreu um erro ao reproduzir a música. \`\`${error}\`\``,);
+        console.log(`Erro no comando de tocar ${error}`)
     }
 }
 
@@ -165,22 +182,22 @@ async function tratarInfosYoutube(video, interaction, voiceChannel) {
 
 
     const solicitado = {
-      membro: {
-        nome: membro.username,
-        tag: tag,
-        id: membro.id,
-      },
-      servidor: {
-        nome: guild.name,
-        id: guild.id,
-        canal: {
-            nome: voiceChannel.name,
-            id: voiceChannel.id,        
-        }
-      },
+        membro: {
+            nome: membro.username,
+            tag: tag,
+            id: membro.id,
+        },
+        servidor: {
+            nome: guild.name,
+            id: guild.id,
+            canal: {
+                nome: voiceChannel.name,
+                id: voiceChannel.id,
+            }
+        },
     }
 
-    
+
 
 
 

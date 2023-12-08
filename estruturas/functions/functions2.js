@@ -16,20 +16,27 @@ module.exports = {
     // Verificar se o link contém o padrão do YouTube
     const padraoYouTube = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
 
-    let id;
+    let resultado;
+    let tipo;
 
     if (link.includes("https://")) {
       if (link.match(padraoYouTube)) {
-        id = link.match(/[a-zA-Z0-9_-]{11}/);
+        resultado = link.match(/[a-zA-Z0-9_-]{11}/);
+        resultado = resultado[0]
+        tipo = "link"
       } else {
-        id = false;
+        resultado = false;
+        tipo = false;
       }
     } else {
-      id = link
+      resultado = link
+      tipo = "id"
     }
 
+    console.log(resultado, tipo)
 
-    return id
+
+    return { resultado, tipo };
 
   }
 
