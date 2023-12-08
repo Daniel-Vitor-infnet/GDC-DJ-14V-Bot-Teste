@@ -9,7 +9,7 @@ const ytdl = require('ytdl-core-discord');
 const playlists = new Map();
 
 module.exports = {
-    name: 'batata',
+    name: 'tocar',
     description: 'Comando para tocar música',
     type: 1,
     options: [
@@ -24,10 +24,10 @@ module.exports = {
         await interaction.deferReply();
 
         try {
-            const query = functions.capturarIDDoVideo(interaction.options.getString('link_ou_nome'));
+            const query = await functions.capturarIDDoVideo(interaction.options.getString('link_ou_nome'));
 
             //Verifica se a reposta é válida (Palavra-Chave ou link do Youtube)
-            if (query) {
+            if (!query) {
                 return interaction.followUp('Infelizmente no momento aceito apenas links do Youtube ou pesquisa por palavras chaves');
             }
 
@@ -65,7 +65,7 @@ module.exports = {
             // Adicionar música à lista de reprodução
             const videoResult = await ytSearch(query);
             const videoSemtratar = videoResult.videos[0];
-            const video = await tratarInfosYoutube(videoSemtratar)
+            const video = await tratarInfosYoutube(videoSemtratar, interaction, voiceChannel)
 
             //Adiciona a música (vídeo) para playlist
             playlist.push(video);
@@ -154,15 +154,42 @@ async function playMusic(voiceChannel, interaction, guildId) {
 
 
 
-async function tratarInfosYoutube(video) {
+async function tratarInfosYoutube(video, interaction, voiceChannel) {
 
     const thumbDoVideoMax = `https://img.youtube.com/vi/${video.videoId}/maxresdefault.jpg`
+
+    const membro = interaction.user
+    const guild = interaction.guild
+
+    const tag = membro.discriminator === '0' ? "Indisponível (conta criada recentemente)" : `#${membro.discriminator}`
+
+
+    const solicitado = {
+      membro: {
+        nome: membro.username,
+        tag: tag,
+        id: membro.id,
+      },
+      servidor: {
+        nome: guild.name,
+        id: guild.id,
+        canal: {
+            nome: voiceChannel.name,
+            id: voiceChannel.id,        
+        }
+      },
+    }
+
+    
+
+
 
     const videosTratados = {
         type: 'video',
         title: video.title || "O título possui caracteres, símbolos ou emojis que não posso reproduzir.",
         description: video.description || "Indisponível",
         url: video.url || "Indisponível",
+        solocitadoPor: solicitado,
         id: video.videoId || "Indisponível",
         seconds: video.seconds || "Indisponível",
         tempo: video.timestamp || "Indisponível",
@@ -171,7 +198,7 @@ async function tratarInfosYoutube(video) {
         ago: video.ago ? await functions.converterDataParaPortugues(video.ago) : "Indisponível",
         imagem: video.image ? thumbDoVideoMax : Midia.Gif.VideoSemImagem,
         thumb: video.thumbnail ? thumbDoVideoMax : Midia.Gif.VideoSemImagem,
-        author: video.author || "Indisponível",
+        canalDoYoutube: video.author || "Indisponível",
     };
 
 
