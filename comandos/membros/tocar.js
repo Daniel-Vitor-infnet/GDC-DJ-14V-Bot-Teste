@@ -7,7 +7,6 @@ const ytdl = require('ytdl-core-discord');
 
 // Estrutura para armazenar listas de reprodução por guild ID
 const playlists = new Map();
-let linkOuNome;
 
 module.exports = {
     name: 'tocar',
@@ -26,7 +25,7 @@ module.exports = {
 
         try {
 
-            linkOuNome = await functions.capturarIDDoVideo(interaction.options.getString('link_ou_nome'));
+            let linkOuNome = await functions.capturarIDDoVideo(interaction.options.getString('link_ou_nome'));
 
             const query = linkOuNome.resultado
 
