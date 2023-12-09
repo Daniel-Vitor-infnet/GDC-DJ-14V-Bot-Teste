@@ -22,7 +22,7 @@ module.exports = {
         },
     ],
     run: async (client, interaction) => {
-        await interaction.deferReply();
+        await interaction.deferReply({ ephemeral: true });
 
         try {
 
@@ -78,15 +78,15 @@ module.exports = {
                     return interaction.followUp(`Nenhum resultado foi encontrado para o link: ${interaction.options.getString('link_ou_nome')}`);
             } else {
                 videoPalavraChave = await procurarPorPalavra(interaction, videoResult, client);
-                console.log(videoPalavraChave)
                 if (videoPalavraChave === null) {
                     return interaction.editReply({ content: `Você demorou muito para responder. Use o comando novamente`, embeds: [], components: [], ephemeral: true });
                 }
             }
 
+
+
             // const video = await tratarInfosYoutube(videoTratado, interaction, voiceChannel)
             const video = videoLink || videoPalavraChave
-            functions.consoleCompleto(video)
 
             //Adiciona a música (vídeo) para playlist
             playlist.push(video);
@@ -97,7 +97,7 @@ module.exports = {
             } else {
                 const adicionaFila = new Discord.EmbedBuilder()
                     .setTitle('Adicionado à lista de reprodução:')
-                    .setDescription(`[${video.title}](${video.url})`)
+                    .setDescription(`[${video.titulo}](${video.url})`)
                     .setColor('#9370DB');
 
                 interaction.followUp({ embeds: [adicionaFila] });
@@ -168,7 +168,7 @@ async function playMusic(voiceChannel, interaction, guildId) {
 
         const embed = new Discord.EmbedBuilder()
             .setTitle('Reproduzindo agora:')
-            .setDescription(`[${video.title}](${video.url})`)
+            .setDescription(`[${video.titulo}](${video.url})`)
             .setColor('#9370DB');
 
         interaction.followUp({ embeds: [embed] });
@@ -217,12 +217,12 @@ async function tratarInfosYoutube(video, interaction, voiceChannel) {
 
     const videosTratados = {
         type: 'video',
-        title: video.title || "O título possui caracteres, símbolos ou emojis que não posso reproduzir.",
+        titulo: video.title || "O título possui caracteres, símbolos ou emojis que não posso reproduzir.",
         description: video.description || "Indisponível",
         url: video.url || "Indisponível",
         solocitadoPor: solicitado || "Indisponível",
         id: video.videoId || "Indisponível",
-        seconds: video.seconds || "Indisponível",
+        segundos: video.seconds || "Indisponível",
         tempo: video.timestamp || "Indisponível",
         duration: video.duration || "Indisponível",
         views: video.views ? video.views.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "Indisponível",
@@ -277,15 +277,14 @@ async function procurarPorPalavra(interaction, videoResultados, client) {
 
         collector.on('collect', async i => {
             const escolhaMenu1 = i.values[0]
-            const videoTratado =  await tratarInfosYoutube(videoLista[escolhaMenu1], interaction);
-           // console.log(videoTratado)
-           
-            
+            const videoTratado = await tratarInfosYoutube(videoLista[escolhaMenu1], interaction);
+
+
 
             const embedEscolha1Resultado = new Discord.EmbedBuilder()
                 .setTitle(`**Detalhes do Vídeo**`)
                 .setColor(Bot.Cor)
-                .setDescription(`**Título:** [${videoTratado.title}](${videoTratado.url})\n**Visualizações:** ${videoTratado.views}\n**Duração:** ${videoTratado.tempo}`)
+                .setDescription(`**Título:** [${videoTratado.titulo}](${videoTratado.url})\n**Visualizações:** ${videoTratado.views}\n**Duração:** ${videoTratado.tempo}`)
                 .setFooter({ text: client.user.username, iconURL: client.user.displayAvatarURL() })
                 .setTimestamp();
 
@@ -317,6 +316,9 @@ async function procurarPorPalavra(interaction, videoResultados, client) {
                 // Verifica se a resposta do menu2 é 'Sim'
                 if (escolhaMenu2 === 'sim') {
                     resolve(videoTratado);
+                    collector.stop();
+                    collectorMenu2.stop();
+                    await interaction.editReply({ embeds: [embedEscolha1Resultado], components: [], ephemeral: true });
                 } else {
                     // Permanece aguardando no escolha15
                     await j.update({ embeds: [embedEscolha1], components: [escolha15], ephemeral: true });
