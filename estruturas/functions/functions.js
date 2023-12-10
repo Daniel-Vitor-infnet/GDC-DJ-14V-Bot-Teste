@@ -15,6 +15,8 @@ const {
   BloqueadoComandoPadrao,
 } = require("./embedPersonalizados");
 
+const {converterDataParaPortugues} = require("./datas_horas.js")
+
 
 
 
@@ -63,6 +65,64 @@ module.exports = {
 
   },
 
+
+  tratarInfosYoutube: async function (video, interaction, voiceChannel) {
+
+    const thumbDoVideoMax = `https://img.youtube.com/vi/${video.videoId}/maxresdefault.jpg`
+
+    const membro = interaction.user
+    const guild = interaction.guild
+
+    const tag = membro.discriminator === '0' ? "Indisponível (conta criada recentemente)" : `#${membro.discriminator}`
+
+    let solicitado = null;
+
+
+    if (voiceChannel) {
+      solicitado = {
+        membro: {
+          nome: membro.username,
+          tag: tag,
+          id: membro.id,
+        },
+        servidor: {
+          nome: guild.name,
+          id: guild.id,
+          canal: {
+            nome: voiceChannel.name,
+            id: voiceChannel.id,
+          }
+        },
+      }
+    }
+
+
+
+
+
+
+    const videosTratados = {
+      type: 'video',
+      titulo: video.title || "O título possui caracteres, símbolos ou emojis que não posso reproduzir.",
+      description: video.description || "Indisponível",
+      url: video.url || "Indisponível",
+      solocitadoPor: solicitado || "Indisponível",
+      id: video.videoId || "Indisponível",
+      segundos: video.seconds || "Indisponível",
+      tempo: video.timestamp || "Indisponível",
+      duration: video.duration || "Indisponível",
+      views: video.views ? video.views.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "Indisponível",
+      upload: video.ago ? await converterDataParaPortugues(video.ago) : "Indisponível",
+      imagem: video.image ? thumbDoVideoMax : Midia.Gif.VideoSemImagem,
+      thumb: video.thumbnail ? thumbDoVideoMax : Midia.Gif.VideoSemImagem,
+      canalDoYoutube: video.author || "Indisponível",
+    };
+
+
+
+
+    return videosTratados
+  },
 
 
 

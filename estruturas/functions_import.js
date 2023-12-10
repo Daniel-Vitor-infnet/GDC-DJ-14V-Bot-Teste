@@ -13,6 +13,7 @@ const {
 const {
   consoleCompleto,
   voipAtual,
+  tratarInfosYoutube,
 } = require("./functions/functions.js")
 
 const {
@@ -40,6 +41,7 @@ module.exports = {
   ///functions
   consoleCompleto,
   voipAtual,
+  tratarInfosYoutube,
   ///functions2
   capturarIDDoVideo,
   ///datas_horas
