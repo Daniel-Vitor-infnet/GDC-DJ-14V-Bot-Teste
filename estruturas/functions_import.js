@@ -14,6 +14,8 @@ const {
   consoleCompleto,
   voipAtual,
   tratarInfosYoutube,
+  playlistsDoServidor,
+  calculaHoraAtualVideo,
 } = require("./functions/functions.js")
 
 const {
@@ -42,6 +44,8 @@ module.exports = {
   consoleCompleto,
   voipAtual,
   tratarInfosYoutube,
+  playlistsDoServidor,
+  calculaHoraAtualVideo,
   ///functions2
   capturarIDDoVideo,
   ///datas_horas

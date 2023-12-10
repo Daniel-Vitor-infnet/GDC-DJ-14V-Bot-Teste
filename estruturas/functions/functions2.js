@@ -36,9 +36,7 @@ module.exports = {
 
     return { resultado, tipo };
 
-  }
-
-
+  },
 
 
 

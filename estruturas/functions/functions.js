@@ -145,7 +145,60 @@ module.exports = {
   },
 
 
+  // Função para notificar o desenvolvedor por mensagem direta (DM)
+  playlistsDoServidor: async function (interaction, guildId) {
 
+    const { playlists } = require("../../comandos/membros/tocar.js")
+
+
+    if (!playlists.has(guildId) || playlists.get(guildId).length === 0) {
+        return null;
+    }
+
+    return playlists.get(guildId);
+
+  },
+
+
+  // Função para notificar o desenvolvedor por mensagem direta (DM)
+  calculaHoraAtualVideo: async function (interaction) {
+
+    const guildId = interaction.guild.id
+
+   const playlistsDoServido = await module.exports.playlistsDoServidor(interaction, guildId)
+
+
+    if (playlistsDoServido === null) {
+        return null;
+    }
+
+    const tempoSolicitado = playlistsDoServido[0].solocitadoPor.membro.hora
+
+    const tempo = playlistsDoServido[0].duration.timestamp
+
+    const partesTempo = tempo.split(':').reverse();
+    let milissegundos = 0;
+    
+    for (let i = 0; i < partesTempo.length; i++) {
+        milissegundos += partesTempo[i] * Math.pow(60, i) * 1000;
+    }
+
+    const calculo = tempoSolicitado - new Date().getTime() + milissegundos
+
+
+    const horas = Math.floor(calculo / 3600000);
+    const minutos = Math.floor((calculo % 3600000) / 60000);
+    const segundos = Math.floor((calculo % 60000) / 1000);
+
+    const horasFormatadas = horas > 0 ? horas.toString() + ':' : '';
+    const minutosFormatados = minutos.toString().padStart(2, '0');
+    const segundosFormatados = segundos.toString().padStart(2, '0');
+
+    return `${horasFormatadas}${minutosFormatados}:${segundosFormatados}`;
+
+
+
+  },
 
 
 

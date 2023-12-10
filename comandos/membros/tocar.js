@@ -54,11 +54,11 @@ module.exports = {
             if (!voiceChannel) {
                 return interaction.followUp('Você precisa estar em um canal de voz para usar este comando.');
             } else if (playlist.length > 0) { // Verifica se o bot já esta em um voip do servidor
-                const botDentroDoVoip = functions.voipAtual(interaction, client, voiceChannel)
 
                 //Verifica se o bot já está em um outro voip do servidor.
-                if (!((await botDentroDoVoip).status)) {
-                    return interaction.followUp(`O bot já esta no voip ${(await botDentroDoVoip).canal}. Só é permito um voip por servidor, caso queira mover o bot precisa remover ele da call use \`\`/sair\`\` para tirar o bot`);
+                const voipDiferenteBot = functions.voipAtual(interaction, client, voiceChannel)
+                if (voipDiferenteBot.status) {
+                    return interaction.followUp(`O bot já esta no voip ${voipDiferenteBot.canal}. Só é permito um voip por servidor, caso queira mover o bot precisa remover ele da call use \`\`/sair\`\` para tirar o bot`);
                 }
             }
 
@@ -168,11 +168,12 @@ async function playMusic(voiceChannel, interaction, guildId) {
         });
 
         const embed = new Discord.EmbedBuilder()
-            .setTitle('Reproduzindo agora:')
+            .setTitle('🎶🎶 Reproduzindo agora: 🎶🎶')
             .setDescription(`[${video.titulo}](${video.url})`)
             .setColor('#9370DB');
 
         interaction.followUp({ embeds: [embed] });
+        playlist[0].solocitadoPor.membro.hora = new Date().getTime();
     } catch (error) {
         await interaction.followUp(`Ocorreu um erro ao reproduzir a música. \`\`${error}\`\``,);
         console.log(`Erro no comando de tocar ${error}`)

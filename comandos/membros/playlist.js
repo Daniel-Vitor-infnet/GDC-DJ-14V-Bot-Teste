@@ -5,40 +5,23 @@ module.exports = {
     name: 'playlist', // Nome do comando
     description: 'Mostra playlist de músicas atuais', // Descrição do comando
     type: 1,
-    options: [
-        {
-            name: "membro",
-            description: "Mencione um membro para ver suas informações.",
-            type: 6,
-            required: false,
-        }
-    ],
+
     run: async (client, interaction) => {
-
-        // Aqui estamos importando a variável playlists do arquivo comandoBatata.js
-        const { playlists } = require("./tocar.js")
-
-        // Agora você pode acessar e modificar playlists normalmente neste arquivo
-        // Exemplo:
-
         await interaction.deferReply({ ephemeral: true });
 
-        const guildId = interaction.guild.id;
-
-        if (!playlists.has(guildId) || playlists.get(guildId).length === 0) {
-            return console.log("não tem")
-        }
+        const guildId = interaction.guildId
 
         //Pega a lista do servidor que o comando foi utilizado
-        const playlistDoServidor = playlists.get(guildId);
+        const playlistDoServidor = await functions.playlistsDoServidor(interaction, guildId);
 
-        console.log(playlistDoServidor)
+        if (!playlistDoServidor) {
+            return interaction.followUp('Não músicas nesse servidor');
+        }
 
-        //  console.log(playlistDoServidor)
 
-        const batata = await procurarPorPalavra(interaction, playlistDoServidor, client);
+        const batata = await playlistMenuSelect(interaction, playlistDoServidor, client);
 
-        console.log(batata)
+        functions.consoleCompleto(batata, "verde");
 
     },
 };
@@ -46,7 +29,7 @@ module.exports = {
 
 
 
-async function procurarPorPalavra(interaction, videoResultados, client) {
+async function playlistMenuSelect(interaction, videoResultados, client) {
     return new Promise(async (resolve) => {
         const valorDoSelectMenu = videoResultados.length <= 25 ? videoResultados.length : 25
         const videoLista = videoResultados.slice(0, valorDoSelectMenu);
@@ -65,14 +48,21 @@ async function procurarPorPalavra(interaction, videoResultados, client) {
             description: video.titulo,
         }));
 
+        const primeiroVideo = videoResultados[0];
+
         const embedEscolha1 = new Discord.EmbedBuilder()
-            .setTitle("Escolha sua música")
+            .setTitle("🎶🎶 Lista de músicas 🎶🎶")
             .setColor(Bot.Cor)
-            .setTimestamp()
+            .setDescription(`**1º.[${primeiroVideo.titulo}](${primeiroVideo.url}) (música Ataul) \n Duração \`\`${primeiroVideo.duration.timestamp}\`\` \n Tempo Restante \`\`${await functions.calculaHoraAtualVideo(interaction)}\`\`**`)
+            .setThumbnail(primeiroVideo.thumb)
             .setFooter({ text: interaction.user.username, iconURL: interaction.user.displayAvatarURL() })
+            .setTimestamp()
 
         let totalCaracteres = 0;
         for (const indice in videoResultados) {
+            if (parseInt(indice) === 0){
+                continue;
+            }
             const numeroDalista = parseInt(indice) + 1
             const videoIndice = videoResultados[indice]
 
