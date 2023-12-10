@@ -66,7 +66,7 @@ module.exports = {
     let canal = '';
 
     // Obtenha o estado de voz do bot no servidor
-    const guild = client.guilds.cache.get(interaction.guildId);
+    const guild = interaction.guild
 
     const botMember = guild.members.cache.get(client.user.id);
 
