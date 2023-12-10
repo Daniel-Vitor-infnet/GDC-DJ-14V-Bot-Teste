@@ -31,22 +31,6 @@ module.exports = {
 
 async function playlistMenuSelect(interaction, videoResultados, client) {
     return new Promise(async (resolve) => {
-        const valorDoSelectMenu = videoResultados.length <= 25 ? videoResultados.length : 25
-        const videoLista = videoResultados.slice(0, valorDoSelectMenu);
-
-        function truncate(str, maxLength) {
-            if (str.length > maxLength) {
-                return str.substring(0, maxLength - 3) + '...';
-            } else {
-                return str;
-            }
-        }
-
-        const escolhas = videoLista.map((video, index) => ({
-            label: `${index + 1}. ${truncate(video.titulo, 30 - (index + 1).toString().length)}`,
-            value: index.toString(),
-            description: video.titulo,
-        }));
 
         const primeiroVideo = videoResultados[0];
 
@@ -59,8 +43,10 @@ async function playlistMenuSelect(interaction, videoResultados, client) {
             .setTimestamp()
 
         let totalCaracteres = 0;
+        let addFieldsQuantidade = -1 
         for (const indice in videoResultados) {
-            if (parseInt(indice) === 0){
+            addFieldsQuantidade++
+            if (parseInt(indice) === 0) {
                 continue;
             }
             const numeroDalista = parseInt(indice) + 1
@@ -73,15 +59,27 @@ async function playlistMenuSelect(interaction, videoResultados, client) {
             const fieldLength = JSON.stringify(fields).length;
 
             // Verifica se adicionar o próximo campo ultrapassa o limite
-            if (totalCaracteres + fieldLength <= 1_500) {
+            if (totalCaracteres + fieldLength <= 1_750) {
                 embedEscolha1.addFields(fields);
                 totalCaracteres += fieldLength;
             } else {
-                embedEscolha1.setDescription(`\`\`\`diff\n- Infelizmente não posso exibir todas músicas por limitações do Discord\`\`\``);
+                await interaction.followUp(`Infelizmente não posso exibir todas músicas por limitações do Discord`,);
                 break;
             }
 
         }
+
+
+        const valorDoSelectMenu = addFieldsQuantidade <= 25 ? addFieldsQuantidade : 25
+        const videoLista = videoResultados.slice(0, valorDoSelectMenu);
+
+        
+
+        const escolhas = videoLista.map((video, index) => ({
+            label: `${index + 1}. ${truncate(video.titulo, 30 - (index + 1).toString().length)}`,
+            value: index.toString(),
+            description: video.titulo,
+        }));
 
         const escolha15 = new Discord.ActionRowBuilder().addComponents(
             new Discord.StringSelectMenuBuilder()
@@ -160,5 +158,16 @@ async function playlistMenuSelect(interaction, videoResultados, client) {
                 resolve(null);
             }
         });
+
+
+        function truncate(str, maxLength) {
+            if (str.length > maxLength) {
+                return str.substring(0, maxLength - 3) + '...';
+            } else {
+                return str;
+            }
+        }
+
+
     });
 }
