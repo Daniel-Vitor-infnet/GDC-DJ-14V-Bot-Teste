@@ -21,12 +21,16 @@ module.exports = {
         },
     ],
     run: async (client, interaction) => {
-        await interaction.deferReply({ ephemeral: true });
+        let linkOuNome = await functions.capturarIDDoVideo(interaction.options.getString('link_ou_nome'));
+
+        if (linkOuNome.tipo === "link") {
+            await interaction.deferReply();
+        } else {
+            await interaction.deferReply({ ephemeral: true });
+        }
+
 
         try {
-
-            let linkOuNome = await functions.capturarIDDoVideo(interaction.options.getString('link_ou_nome'));
-
             const query = linkOuNome.resultado
 
             //Verifica se a reposta é válida (Palavra-Chave ou link do Youtube)
@@ -52,8 +56,8 @@ module.exports = {
             } else if (playlist.length > 0) { // Verifica se o bot já esta em um voip do servidor
                 const botDentroDoVoip = functions.voipAtual(interaction, client, voiceChannel)
 
-                //Verifica se o bot já está em um voip do servidor.
-                if ((await botDentroDoVoip).status) {
+                //Verifica se o bot já está em um outro voip do servidor.
+                if (!((await botDentroDoVoip).status)) {
                     return interaction.followUp(`O bot já esta no voip ${(await botDentroDoVoip).canal}. Só é permito um voip por servidor, caso queira mover o bot precisa remover ele da call use \`\`/sair\`\` para tirar o bot`);
                 }
             }
