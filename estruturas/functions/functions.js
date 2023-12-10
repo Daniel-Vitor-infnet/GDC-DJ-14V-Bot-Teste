@@ -15,7 +15,7 @@ const {
   BloqueadoComandoPadrao,
 } = require("./embedPersonalizados");
 
-const {converterDataParaPortugues} = require("./datas_horas.js")
+const { converterDataParaPortugues } = require("./datas_horas.js")
 
 
 
@@ -24,15 +24,35 @@ module.exports = {
 
 
   // Função para notificar o desenvolvedor por mensagem direta (DM)
-  consoleCompleto: async function (solicitado) {
+  consoleCompleto: async function (solicitado, cor) {
 
-    // Código ANSI para cor laranja
-    const corLaranja = '\x1b[33m';
+    let corEscolhida;
+
+    // Adicionando mais cores ao switch para diferentes opções
+    switch (cor) {
+      case "laranja":
+        corEscolhida = '\x1b[33m'; // Laranja
+        break;
+      case "vermelho":
+        corEscolhida = '\x1b[31m'; // Vermelho
+        break;
+      case "azul":
+        corEscolhida = '\x1b[34m'; // Azul
+        break;
+      case "verde":
+        corEscolhida = '\x1b[32m'; // Verde
+        break;
+      default:
+        corEscolhida = '\x1b[35m'; // Padrão (redefinir a cor)
+        break;
+    }
+
+
 
     // Código ANSI para redefinir a cor para a padrão
     const resetCor = '\x1b[0m';
 
-    console.log(corLaranja, JSON.stringify(solicitado, null, 2), resetCor);
+    console.log(corEscolhida, JSON.stringify(solicitado, null, 2), resetCor);
 
     return;
 
