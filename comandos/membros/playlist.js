@@ -43,29 +43,18 @@ async function playlistMenuSelect(interaction, videoResultados, client) {
             .setTimestamp()
 
         let totalCaracteres = 0;
-        let addFieldsQuantidade = -1 
+        let addFieldsQuantidade = 1
         for (const indice in videoResultados) {
-            addFieldsQuantidade++
             if (parseInt(indice) === 0) {
                 continue;
-            }
-            const numeroDalista = parseInt(indice) + 1
-            const videoIndice = videoResultados[indice]
-
-            const field1 = { name: `Título`, value: `**${numeroDalista}º.[${videoIndice.titulo}](${videoIndice.url})**`, inline: true };
-            const field2 = { name: `Duração`, value: `\`\`${videoIndice.tempo}\`\``, inline: true };
-            const field3 = { name: `Solicitado Por:`, value: `<@${videoIndice.solocitadoPor.membro.id}>`, inline: true };
-            const fields = [field1, field2, field3];
-            const fieldLength = JSON.stringify(fields).length;
-
-            // Verifica se adicionar o próximo campo ultrapassa o limite
-            if (totalCaracteres + fieldLength <= 1_750) {
-                embedEscolha1.addFields(fields);
-                totalCaracteres += fieldLength;
-            } else {
-                await interaction.followUp(`Infelizmente não posso exibir todas músicas por limitações do Discord`,);
+            } else if (parseInt(indice) > 25) {
                 break;
             }
+            addFieldsQuantidade++
+            const numeroDalista = parseInt(indice) + 1
+            const videoIndice = videoResultados[indice]
+                embedEscolha1.addFields({ name: `Título`, value: `**${numeroDalista}º.[${videoIndice.titulo}](${videoIndice.url})**`, inline: false });
+
 
         }
 
