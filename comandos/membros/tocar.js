@@ -230,9 +230,10 @@ async function procurarPorPalavra(interaction, videoResultados, client, voiceCha
             const embedEscolha1Resultado = new Discord.EmbedBuilder()
                 .setTitle(`**Detalhes do Vídeo**`)
                 .setColor(Bot.Cor)
-                .setDescription(`**Título:** [${videoTratado.titulo}](${videoTratado.url})\n**Visualizações:** ${videoTratado.views}\n**Duração:** ${videoTratado.tempo}`)
+                .setDescription(`**Título:** [${videoTratado.titulo}](${videoTratado.url})\n**Visualizações:** \`\`${videoTratado.views}\`\` \n**Duração:** \`\`${videoTratado.tempo}\`\`  \n**Postado em:** \`\`${videoTratado.upload}\`\``)
                 .setFooter({ text: client.user.username, iconURL: client.user.displayAvatarURL() })
-                .setTimestamp();
+                .setImage(videoTratado.imagem)
+                .setTimestamp(); 
 
             const menu2 = new Discord.ActionRowBuilder().addComponents(
                 new Discord.StringSelectMenuBuilder()

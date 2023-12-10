@@ -11,6 +11,7 @@ const {
 } = require("./functions/embedPersonalizados.js");
 
 const {
+  barraDeProgresso,
   consoleCompleto,
   voipAtual,
   tratarInfosYoutube,
@@ -41,6 +42,7 @@ module.exports = {
   BloqueadoComando,
   subComandoBloqueado,
   ///functions
+  barraDeProgresso,
   consoleCompleto,
   voipAtual,
   tratarInfosYoutube,

@@ -34,15 +34,31 @@ async function playlistMenuSelect(interaction, videoResultados, client) {
 
         const primeiroVideo = videoResultados[0];
 
+        //Barra de Progresso
+        function converterTempoYoutube(tempo) {
+            const partesTempo = tempo.split(':').reverse();
+            let milissegundos = 0;
+
+            for (let i = 0; i < partesTempo.length; i++) {
+                milissegundos += partesTempo[i] * Math.pow(60, i) * 1000;
+            }
+
+            return milissegundos;
+        }
+
+        const finalBarra = converterTempoYoutube(primeiroVideo.duration.timestamp);
+        const inicioBarra = await functions.calculaHoraAtualVideo(interaction);
+        const inicioBarra2 = finalBarra - converterTempoYoutube(inicioBarra);
+        const barraDeProgresso = await functions.barraDeProgresso(inicioBarra2, finalBarra);
+
         const embedEscolha1 = new Discord.EmbedBuilder()
             .setTitle("🎶🎶 Lista de músicas 🎶🎶")
             .setColor(Bot.Cor)
-            .setDescription(`**1º.[${primeiroVideo.titulo}](${primeiroVideo.url}) (música Ataul) \n Duração \`\`${primeiroVideo.duration.timestamp}\`\` \n Tempo Restante \`\`${await functions.calculaHoraAtualVideo(interaction)}\`\`**`)
+            .setDescription(`**1º.[${primeiroVideo.titulo}](${primeiroVideo.url}) (música Ataul) \n \`\`\`${inicioBarra} ${barraDeProgresso} ${primeiroVideo.duration.timestamp}\`\`\`**`)
             .setThumbnail(primeiroVideo.thumb)
             .setFooter({ text: interaction.user.username, iconURL: interaction.user.displayAvatarURL() })
             .setTimestamp()
 
-        let totalCaracteres = 0;
         let addFieldsQuantidade = 1
         for (const indice in videoResultados) {
             if (parseInt(indice) === 0) {
@@ -53,7 +69,7 @@ async function playlistMenuSelect(interaction, videoResultados, client) {
             addFieldsQuantidade++
             const numeroDalista = parseInt(indice) + 1
             const videoIndice = videoResultados[indice]
-                embedEscolha1.addFields({ name: `Título`, value: `**${numeroDalista}º.[${videoIndice.titulo}](${videoIndice.url})**`, inline: false });
+            embedEscolha1.addFields({ name: `Título`, value: `**${numeroDalista}º.[${videoIndice.titulo}](${videoIndice.url})**`, inline: false });
 
 
         }
@@ -62,7 +78,7 @@ async function playlistMenuSelect(interaction, videoResultados, client) {
         const valorDoSelectMenu = addFieldsQuantidade <= 25 ? addFieldsQuantidade : 25
         const videoLista = videoResultados.slice(0, valorDoSelectMenu);
 
-        
+
 
         const escolhas = videoLista.map((video, index) => ({
             label: `${index + 1}. ${truncate(video.titulo, 30 - (index + 1).toString().length)}`,

@@ -22,6 +22,75 @@ const { converterDataParaPortugues } = require("./datas_horas.js")
 
 module.exports = {
 
+  // Função para notificar o desenvolvedor por mensagem direta (DM)
+  barraDeProgresso: async function (atual, fianl, tipo, porcentagemTrue) {
+
+
+    // Calcule a porcentagem de progresso
+    const progresso = Math.max(0, Math.min(100, (atual / fianl) * 100));
+
+
+
+    let prenchidosTipo;
+    let vaziosTipo;
+    let tamanhoDaBarra
+    // Adicionando mais cores ao switch para diferentes opções
+    switch (tipo) {
+      case 1:
+        tamanhoDaBarra = 20;
+        vaziosTipo = '░';
+        prenchidosTipo = '▓';
+        break;
+      case 2:
+        tamanhoDaBarra = 30;
+        vaziosTipo = '▨';
+        prenchidosTipo = '■';
+        break;
+      case 3:
+        tamanhoDaBarra = 25;
+        vaziosTipo = '○';
+        prenchidosTipo = '●';
+        break;
+      case 4:
+        tamanhoDaBarra = 28;
+        vaziosTipo = '▒';
+        prenchidosTipo = '░';
+        break;
+      case 5:
+        tamanhoDaBarra = 22;
+        vaziosTipo = ' ';
+        prenchidosTipo = '●';
+        break;
+      case 6:
+        tamanhoDaBarra = 28;
+        vaziosTipo = '▝';
+        prenchidosTipo = '▒';
+        break;
+      default:
+        tamanhoDaBarra = 28;
+        vaziosTipo = '□';
+        prenchidosTipo = '▖';
+        break;
+    }
+
+
+    const prenchidos = Math.round((tamanhoDaBarra * progresso) / 100);
+    const vazios = tamanhoDaBarra - prenchidos;
+
+    let porcentagem = porcentagemTrue
+
+    if (porcentagem !== null) {
+       porcentagem = `${progresso.toFixed(2)}%`
+    } else {
+       porcentagem = ``
+    }
+
+    const progressBar = `[${prenchidosTipo.repeat(prenchidos)}${vaziosTipo.repeat(vazios)}] ${porcentagem}%`;
+
+    return progressBar;
+
+  },
+
 
   // Função para notificar o desenvolvedor por mensagem direta (DM)
   consoleCompleto: async function (solicitado, cor) {
@@ -152,7 +221,7 @@ module.exports = {
 
 
     if (!playlists.has(guildId) || playlists.get(guildId).length === 0) {
-        return null;
+      return null;
     }
 
     return playlists.get(guildId);
@@ -165,11 +234,11 @@ module.exports = {
 
     const guildId = interaction.guild.id
 
-   const playlistsDoServido = await module.exports.playlistsDoServidor(interaction, guildId)
+    const playlistsDoServido = await module.exports.playlistsDoServidor(interaction, guildId)
 
 
     if (playlistsDoServido === null) {
-        return null;
+      return null;
     }
 
     const tempoSolicitado = playlistsDoServido[0].solocitadoPor.membro.hora
@@ -178,9 +247,9 @@ module.exports = {
 
     const partesTempo = tempo.split(':').reverse();
     let milissegundos = 0;
-    
+
     for (let i = 0; i < partesTempo.length; i++) {
-        milissegundos += partesTempo[i] * Math.pow(60, i) * 1000;
+      milissegundos += partesTempo[i] * Math.pow(60, i) * 1000;
     }
 
     const calculo = tempoSolicitado - new Date().getTime() + milissegundos
