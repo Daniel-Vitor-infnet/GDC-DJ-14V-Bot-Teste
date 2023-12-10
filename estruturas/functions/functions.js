@@ -76,7 +76,7 @@ module.exports = {
     // Verifica se o bot está em algum canal de voz
     if (voiceState && voiceState.channel) {
       if (voiceState.guild.id === voipSolicitado.guild.id) {
-        if (voiceState.channel.id !== voipSolicitado.id)
+        if (voiceState.channel.id === voipSolicitado.id)
           status = true;
         canal = `<#${voipSolicitado.id}>`
       }
