@@ -21,7 +21,6 @@ module.exports = {
 
         const batata = await playlistMenuSelect(interaction, playlistDoServidor, client);
 
-        functions.consoleCompleto(batata, "verde");
 
     },
 };
@@ -33,6 +32,7 @@ async function playlistMenuSelect(interaction, videoResultados, client) {
     return new Promise(async (resolve) => {
 
         const primeiroVideo = videoResultados[0];
+        console.log(videoResultados)
 
         //Barra de Progresso
         function converterTempoYoutube(tempo) {
