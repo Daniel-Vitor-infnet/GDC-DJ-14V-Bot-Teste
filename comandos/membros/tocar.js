@@ -54,7 +54,6 @@ module.exports = {
             if (!voiceChannel) {
                 return interaction.followUp('Você precisa estar em um canal de voz para usar este comando.');
             } else if (playlist.length > 0) { // Verifica se o bot já esta em um voip do servidor
-
                 //Verifica se o bot já está em um outro voip do servidor.
                 const voipDiferenteBot = functions.voipAtual(interaction, client, voiceChannel)
                 if (voipDiferenteBot.status) {
