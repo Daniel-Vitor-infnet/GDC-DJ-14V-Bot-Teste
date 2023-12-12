@@ -191,9 +191,9 @@ async function procurarPorPalavra(interaction, videoResultados, client, voiceCha
         }
 
         const escolhas = videoLista.map((video, index) => ({
-            label: `${index + 1}. ${truncate(video.title, 30 - (index + 1).toString().length)}`,
+            label: `${index + 1}. ${truncate(video.title, 60 - (index + 1).toString().length)}`,
             value: index.toString(),
-            description: video.title,
+            description: `Duração: ${video.duration.timestamp}`,
         }));
 
         const embedEscolha1 = new Discord.EmbedBuilder()
