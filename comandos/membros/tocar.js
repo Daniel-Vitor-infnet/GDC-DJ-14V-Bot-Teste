@@ -234,11 +234,11 @@ async function procurarPorPalavra(interaction, videoResultados, client, voiceCha
                     .setPlaceholder('Tem certeza?')
                     .addOptions([
                         {
-                            label: 'Sim',
+                            label: 'Reproduzir música.',
                             value: 'sim',
                         },
                         {
-                            label: 'Não',
+                            label: 'Voltar para lista de músicas.',
                             value: 'nao',
                         },
                     ])
