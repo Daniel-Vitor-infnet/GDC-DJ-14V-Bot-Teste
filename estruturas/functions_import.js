@@ -22,7 +22,6 @@ const {
 } = require("./functions/functions2.js")
 
 const {
-  deletarArquivosDaPlaylist,
   manipularPlaylist,
   manipularPlaylistIndices,
   tratarInfosYoutube,
@@ -52,7 +51,6 @@ module.exports = {
   voipAtual,
   calculaHoraAtualVideo,
   ///functions Playlist
-  deletarArquivosDaPlaylist,
   manipularPlaylist,
   manipularPlaylistIndices,
   tratarInfosYoutube,
