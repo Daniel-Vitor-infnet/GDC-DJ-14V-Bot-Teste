@@ -1,4 +1,5 @@
 const { ActivityType } = require('discord.js');
+const {apagarTodosArquivosPlaylist} = require("../estruturas/functions/functions_playlist.js")
 var moment = require('moment-timezone');
 moment.locale('pt-BR');
 let data = moment().tz("America/Sao_Paulo").format('dddd 𝙳𝚒𝚊: LL 𝙰̀𝚜: LTS');
@@ -6,6 +7,7 @@ module.exports = {
   name: "ready",
   execute(client) {
     console.log(`🔥 Estou online! ${data}`);
+    apagarTodosArquivosPlaylist();
     
     // Defina o status do bot
     client.user.setPresence({

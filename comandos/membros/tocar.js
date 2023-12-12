@@ -5,8 +5,6 @@ const { joinVoiceChannel, createAudioPlayer, createAudioResource, VoiceConnectio
 const ytSearch = require('yt-search');
 const ytdl = require('ytdl-core-discord');
 
-// Estrutura para armazenar listas de reprodução por guild ID
-const playlists = new Map();
 
 module.exports = {
     name: 'tocar',
@@ -43,18 +41,13 @@ module.exports = {
             const guildId = interaction.guild.id;
 
             // Verificar se existe uma lista de reprodução para o servidor
-            if (!playlists.has(guildId)) {
-                playlists.set(guildId, []);
-            }
-
-            const playlist = playlists.get(guildId);
+            await functions.manipularPlaylist(interaction, "criar")
 
 
             //Verifica se o membro esta em canal de voip
             if (!voiceChannel) {
                 return interaction.followUp('Você precisa estar em um canal de voz para usar este comando.');
-            } else if (playlist.length > 0) { // Verifica se o bot já esta em um voip do servidor
-                //Verifica se o bot já está em um outro voip do servidor.
+            } else { // Verifica se o bot já esta em um voip do servidor
                 const voipDiferenteBot = functions.voipAtual(interaction, client, voiceChannel)
                 if (voipDiferenteBot.status) {
                     return interaction.followUp(`O bot já esta no voip ${voipDiferenteBot.canal}. Só é permito um voip por servidor, caso queira mover o bot precisa remover ele da call use \`\`/sair\`\` para tirar o bot`);
@@ -72,11 +65,13 @@ module.exports = {
             const videoResult = await ytSearch(query);
             let videoLink;
             let videoPalavraChave;
+            let selectedVideo;
 
             //Verifica se a resposta foi link. caso for busca apenas o resultado do link
             if (linkOuNome.tipo === "link") {
-                videoLink = await functions.tratarInfosYoutube(videoResult.videos[0], interaction, voiceChannel);
-                if (videoLink.id !== linkOuNome.resultado)
+                selectedVideo = videoResult.videos.find(video => video.videoId === query);
+                videoLink = await functions.tratarInfosYoutube(interaction, selectedVideo);
+                if (!selectedVideo)
                     return interaction.followUp(`Nenhum resultado foi encontrado para o link: ${interaction.options.getString('link_ou_nome')}`);
             } else {
                 videoPalavraChave = await procurarPorPalavra(interaction, videoResult, client, voiceChannel);
@@ -89,10 +84,11 @@ module.exports = {
             const video = videoLink || videoPalavraChave
 
             //Adiciona a música (vídeo) para playlist
-            playlist.push(video);
+            await functions.manipularPlaylist(interaction, "push", video)
+
 
             // Se não estiver reproduzindo, iniciar reprodução
-            if (playlist.length === 1) {
+            if (await functions.manipularPlaylist(interaction, "tamanho") === 1) {
                 playMusic(voiceChannel, interaction, guildId);
             } else {
                 const adicionaFila = new Discord.EmbedBuilder()
@@ -115,7 +111,6 @@ module.exports = {
             }
         }
     },
-    playlists,
 };
 
 // Função para reproduzir música da lista de reprodução
@@ -127,8 +122,7 @@ async function playMusic(voiceChannel, interaction, guildId) {
             adapterCreator: voiceChannel.guild.voiceAdapterCreator,
         });
 
-        const playlist = playlists.get(guildId);
-        const video = playlist[0];
+        const video = await functions.manipularPlaylistIndices(interaction, "primeiroVideo");
 
         const stream = await ytdl(video.url, { quality: 'highestaudio', highWaterMark: 1 << 25 });
         const resource = createAudioResource(stream, { inputType: 'opus' });
@@ -137,18 +131,18 @@ async function playMusic(voiceChannel, interaction, guildId) {
         connection.subscribe(player);
         player.play(resource);
 
-        player.on('stateChange', (oldState, newState) => {
+        player.on('stateChange', async (oldState, newState) => {
             if (oldState.status !== newState.status && newState.status === 'idle') {
                 // Remover música da lista de reprodução após terminar de reproduzir
-                playlist.shift();
+                await functions.manipularPlaylist(interaction, "shift");
                 const membrosAtuisDoCanal = voiceChannel.members.size || 0;
-                const playListAtual = playlist.length || 0;
+                const playListAtual = await functions.manipularPlaylist(interaction, "tamanho");
 
                 if (membrosAtuisDoCanal <= 1 || playListAtual === 0) {
                     setTimeout(() => {
                         if (membrosAtuisDoCanal <= 1 || playListAtual === 0) {
-                            if (playlists.has(guildId)) {
-                                playlists.delete(guildId);
+                            if (functions.manipularPlaylist(interaction, "verificar")) {
+                                functions.manipularPlaylist(interaction, "delete")
                             }
                             if (connection.state.status === VoiceConnectionStatus.Ready) {
                                 connection.destroy(); // Se n tiver ninguém na call sair 
@@ -172,7 +166,8 @@ async function playMusic(voiceChannel, interaction, guildId) {
             .setColor('#9370DB');
 
         interaction.followUp({ embeds: [embed] });
-        playlist[0].solocitadoPor.membro.hora = new Date().getTime();
+        //Adiciona a hora que começou a reprodução
+        await functions.manipularPlaylistIndices(interaction, "hora")
     } catch (error) {
         await interaction.followUp(`Ocorreu um erro ao reproduzir a música. \`\`${error}\`\``,);
         console.log(`Erro no comando de tocar ${error}`)
@@ -222,8 +217,7 @@ async function procurarPorPalavra(interaction, videoResultados, client, voiceCha
 
         collector.on('collect', async i => {
             const escolhaMenu1 = i.values[0]
-            const videoTratado = await functions.tratarInfosYoutube(videoLista[escolhaMenu1], interaction, voiceChannel);
-
+            const videoTratado = await functions.tratarInfosYoutube(interaction, videoLista[escolhaMenu1]);
 
 
             const embedEscolha1Resultado = new Discord.EmbedBuilder()
@@ -232,7 +226,7 @@ async function procurarPorPalavra(interaction, videoResultados, client, voiceCha
                 .setDescription(`**Título:** [${videoTratado.titulo}](${videoTratado.url})\n**Visualizações:** \`\`${videoTratado.views}\`\` \n**Duração:** \`\`${videoTratado.tempo}\`\`  \n**Postado em:** \`\`${videoTratado.upload}\`\``)
                 .setFooter({ text: client.user.username, iconURL: client.user.displayAvatarURL() })
                 .setImage(videoTratado.imagem)
-                .setTimestamp(); 
+                .setTimestamp();
 
             const menu2 = new Discord.ActionRowBuilder().addComponents(
                 new Discord.StringSelectMenuBuilder()

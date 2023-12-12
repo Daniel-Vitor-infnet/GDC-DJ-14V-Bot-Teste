@@ -14,7 +14,6 @@ const {
   barraDeProgresso,
   consoleCompleto,
   voipAtual,
-  tratarInfosYoutube,
   playlistsDoServidor,
   calculaHoraAtualVideo,
 } = require("./functions/functions.js")
@@ -22,6 +21,13 @@ const {
 const {
   capturarIDDoVideo,
 } = require("./functions/functions2.js")
+
+const {
+  deletarArquivosDaPlaylist,
+  manipularPlaylist,
+  manipularPlaylistIndices,
+  tratarInfosYoutube,
+} = require("./functions/functions_playlist.js")
 
 const {
   dataDefault,
@@ -45,9 +51,13 @@ module.exports = {
   barraDeProgresso,
   consoleCompleto,
   voipAtual,
-  tratarInfosYoutube,
   playlistsDoServidor,
   calculaHoraAtualVideo,
+  ///functions Playlist
+  deletarArquivosDaPlaylist,
+  manipularPlaylist,
+  manipularPlaylistIndices,
+  tratarInfosYoutube,
   ///functions2
   capturarIDDoVideo,
   ///datas_horas

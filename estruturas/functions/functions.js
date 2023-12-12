@@ -15,7 +15,6 @@ const {
   BloqueadoComandoPadrao,
 } = require("./embedPersonalizados");
 
-const { converterDataParaPortugues } = require("./datas_horas.js")
 
 
 
