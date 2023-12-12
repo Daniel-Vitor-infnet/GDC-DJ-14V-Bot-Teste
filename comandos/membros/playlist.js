@@ -9,14 +9,22 @@ module.exports = {
     run: async (client, interaction) => {
         await interaction.deferReply({ ephemeral: true });
 
-        const guildId = interaction.guildId
 
-        //Pega a lista do servidor que o comando foi utilizado
-        const playlistDoServidor = await functions.playlistsDoServidor(interaction, guildId);
-
-        if (!playlistDoServidor) {
+        //Verifica se tem músicas no servidor
+        let tamanhoDaPlaylist = await functions.manipularPlaylist(interaction, "tamanho");
+        tamanhoDaPlaylist = tamanhoDaPlaylist || 0
+        if (!(await functions.manipularPlaylist(interaction, "verificar"))) {
+            return interaction.followUp('Não músicas nesse servidor');
+        } else if (tamanhoDaPlaylist <= 0) {
             return interaction.followUp('Não músicas nesse servidor');
         }
+
+        //Pega a lista do servidor que o comando foi utilizado
+        const playlistDoServidor = await functions.manipularPlaylist(interaction, "playlist");
+
+        
+
+
 
 
         const batata = await playlistMenuSelect(interaction, playlistDoServidor, client);
