@@ -11,18 +11,22 @@ module.exports = {
 
 
         //Verifica se tem músicas no servidor
-        let tamanhoDaPlaylist = await functions.manipularPlaylist(interaction, "tamanho");
-        tamanhoDaPlaylist = tamanhoDaPlaylist || 0
+
         if (!(await functions.manipularPlaylist(interaction, "verificar"))) {
             return interaction.followUp('Não músicas nesse servidor');
-        } else if (tamanhoDaPlaylist <= 0) {
-            return interaction.followUp('Não músicas nesse servidor');
+        } else {
+            let tamanhoDaPlaylist = await functions.manipularPlaylist(interaction, "tamanho");
+            tamanhoDaPlaylist = tamanhoDaPlaylist || 0
+            if (tamanhoDaPlaylist === 0) {
+                return interaction.followUp('Não músicas nesse servidor');
+            }
+
         }
 
         //Pega a lista do servidor que o comando foi utilizado
         const playlistDoServidor = await functions.manipularPlaylist(interaction, "playlist");
 
-        
+
 
 
 

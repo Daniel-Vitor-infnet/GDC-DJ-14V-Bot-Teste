@@ -11,7 +11,6 @@ let idDoServidor;
 let pastaPlaylists = path.join('./playlist');
 
 const { converterDataParaPortugues } = require("./datas_horas.js")
-const { consoleCompleto } = require("./functions.js")
 
 
 
@@ -57,6 +56,7 @@ module.exports = {
         if (operacao === "verificar") {
             try {
                 await fs.access(arquivoPlaylist);
+                return true;
             } catch (error) {
                 return false;
             }
@@ -94,7 +94,7 @@ module.exports = {
             case 'playlist':
                 return playlist;
             default:
-                console.error('Operação não reconhecida.');
+                console.error(`Operação não reconhecida. ${operacao}`);
                 return;
         }
 
@@ -128,7 +128,7 @@ module.exports = {
                 playlist[0].solocitadoPor.membro.horaConvertida = dataFormatada
                 break;
             default:
-                console.error('Operação não reconhecida.');
+                console.error(`Operação não reconhecida. ${operacao}`);
                 return;
         }
 

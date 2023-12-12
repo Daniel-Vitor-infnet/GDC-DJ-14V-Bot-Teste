@@ -15,6 +15,7 @@ const {
   BloqueadoComandoPadrao,
 } = require("./embedPersonalizados");
 
+const {manipularPlaylist} = require("./functions_playlist.js")
 
 
 
@@ -157,32 +158,13 @@ module.exports = {
 
 
 
-  // Função para notificar o desenvolvedor por mensagem direta (DM)
-  playlistsDoServidor: async function (interaction, guildId) {
-
-    const { playlists } = require("../../comandos/membros/tocar.js")
-
-
-    if (!playlists.has(guildId) || playlists.get(guildId).length === 0) {
-      return null;
-    }
-
-    return playlists.get(guildId);
-
-  },
-
 
   // Função para notificar o desenvolvedor por mensagem direta (DM)
   calculaHoraAtualVideo: async function (interaction) {
 
-    const guildId = interaction.guild.id
 
-    const playlistsDoServido = await module.exports.playlistsDoServidor(interaction, guildId)
+    const playlistsDoServido = await manipularPlaylist(interaction, "playlist" );
 
-
-    if (playlistsDoServido === null) {
-      return null;
-    }
 
     const tempoSolicitado = playlistsDoServido[0].solocitadoPor.membro.hora
 

@@ -14,7 +14,6 @@ const {
   barraDeProgresso,
   consoleCompleto,
   voipAtual,
-  playlistsDoServidor,
   calculaHoraAtualVideo,
 } = require("./functions/functions.js")
 
@@ -51,7 +50,6 @@ module.exports = {
   barraDeProgresso,
   consoleCompleto,
   voipAtual,
-  playlistsDoServidor,
   calculaHoraAtualVideo,
   ///functions Playlist
   deletarArquivosDaPlaylist,
