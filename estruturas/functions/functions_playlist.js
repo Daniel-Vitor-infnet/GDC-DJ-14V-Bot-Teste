@@ -179,7 +179,6 @@ module.exports = {
             for (const arquivo of arquivos) {
                 const caminhoArquivo = path.join(pastaPlaylists, arquivo);
                 await fs.unlink(caminhoArquivo);
-                console.log(`Arquivo ${caminhoArquivo} removido com sucesso.`);
             }
 
         } catch (error) {
