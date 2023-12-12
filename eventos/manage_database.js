@@ -19,19 +19,20 @@ function resetOldData() {
     }
   });
 }
-*/
+
 
 db.serialize(() => {
   // Cria a tabela "playlist" 
 db.run("CREATE TABLE IF NOT EXISTS playlist (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, author TEXT, url TEXT, duration TEXT);");
 
 
-/*
+
   // Agende a função resetOldData() será executada às 00:00, 03:00, 06:00, 10:00, 15:00, 18:00 e 21:00.
   cron.schedule("0 0,3,6,10,15,18,21 * * *", () => {
     resetOldData();
   });
-  */
+
 
 });
 
+  */
